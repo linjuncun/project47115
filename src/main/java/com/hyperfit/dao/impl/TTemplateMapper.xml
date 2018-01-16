@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TTemplateMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TTemplate">
+        <id column="template_id" jdbcType="INTEGER" property="templateId"/>
+        <result column="template_name" jdbcType="VARCHAR" property="templateName"/>
+        <result column="course_type" jdbcType="INTEGER" property="courseType"/>
+        <result column="minutes" jdbcType="INTEGER" property="minutes"/>
+        <result column="min_num" jdbcType="INTEGER" property="minNum"/>
+        <result column="max_num" jdbcType="INTEGER" property="maxNum"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="notes" jdbcType="VARCHAR" property="notes"/>
+        <result column="images" jdbcType="VARCHAR" property="images"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <!--查询模版-->
+    <select id="getTemplate" parameterType="map" resultMap="BaseResultMap">
+        select tt.*
+        from t_template tt
+        where tt.status = 1
+        <if test="courseType != null and courseType != '' ">
+            AND tt.course_type = #{courseType}
+        </if>
+        <if test="templateName != null and templateName != '' ">
+            AND tt.template_name = #{templateName}
+        </if>
+        <if test="templateId != null and templateId != '' ">
+            AND tt.template_id = #{templateId}
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_template
+        where template_id = #{templateId,jdbcType=INTEGER}
+    </delete>
+    <!--添加模版-->
+    <insert id="insertTemplate" parameterType="com.hyperfit.entity.TTemplate">
+        insert into t_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">
+                template_id,
+            </if>
+            <if test="templateName != null">
+                template_name,
+            </if>
+            <if test="courseType != null">
+                course_type,
+            </if>
+            <if test="minutes != null">
+                minutes,
+            </if>
+            <if test="minNum != null">
+                min_num,
+            </if>
+            <if test="maxNum != null">
+                max_num,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="notes != null">
+                notes,
+            </if>
+            <if test="images != null">
+                images,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">
+                #{templateId,jdbcType=INTEGER},
+            </if>
+            <if test="templateName != null">
+                #{templateName,jdbcType=VARCHAR},
+            </if>
+            <if test="courseType != null">
+                #{courseType,jdbcType=INTEGER},
+            </if>
+            <if test="minutes != null">
+                #{minutes,jdbcType=INTEGER},
+            </if>
+            <if test="minNum != null">
+                #{minNum,jdbcType=INTEGER},
+            </if>
+            <if test="maxNum != null">
+                #{maxNum,jdbcType=INTEGER},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="notes != null">
+                #{notes,jdbcType=VARCHAR},
+            </if>
+            <if test="images != null">
+                #{images,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--修改模版-->
+    <update id="updateTemplate" parameterType="map">
+        update t_template
+        <set>
+            <if test="record.templateId != null">
+                template_id = #{record.templateId,jdbcType=INTEGER},
+            </if>
+            <if test="record.templateName != null">
+                template_name = #{record.templateName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.courseType != null">
+                course_type = #{record.courseType,jdbcType=INTEGER},
+            </if>
+            <if test="record.minutes != null">
+                minutes = #{record.minutes,jdbcType=INTEGER},
+            </if>
+            <if test="record.minNum != null">
+                min_num = #{record.minNum,jdbcType=INTEGER},
+            </if>
+            <if test="record.maxNum != null">
+                max_num = #{record.maxNum,jdbcType=INTEGER},
+            </if>
+            <if test="record.intro != null">
+                intro = #{record.intro,jdbcType=VARCHAR},
+            </if>
+            <if test="record.notes != null">
+                notes = #{record.notes,jdbcType=VARCHAR},
+            </if>
+            <if test="record.images != null">
+                images = #{record.images,jdbcType=VARCHAR},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE template_id = #{record.templateId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

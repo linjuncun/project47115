@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top"/>
+    <title>教练详情</title>
+    <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../plugins/datatables/1.10.15/jquery.dataTables.css" rel="stylesheet"/>
+</head>
+
+<body>
+<!-- HEADER -->
+<header class="navbar clearfix" id="header">
+    <div class="container">
+        <div class="navbar-brand">
+            <img class="text-logo" src="../images/logo.png">
+            <span>Hyperfit 管理系统</span>
+        </div>
+        <ul class="nav navbar-nav pull-right">
+            <!-- BEGIN USER LOGIN DROPDOWN -->
+            <li class="dropdown pull-right">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="username" id="navUser">个人信息管理</span>
+                    <i class="fa fa-angle-down pull-down-icon"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a id="resetPwd">修改密码</a>
+                    </li>
+                    <li>
+                        <a id="logoutBtn">退出登录</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</header>
+<!--/HEADER -->
+<!-- PAGE -->
+<section id="page">
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-menu nav-collapse">
+            <div class="menu-header">
+                <i class="fa fa-bars menu-icon"></i>
+            </div>
+            <!-- SIDEBAR MENU -->
+            <ul id="sideMenu" data-pageid='39'>
+            </ul>
+            <!-- /SIDEBAR MENU -->
+        </div>
+    </div>
+    <!-- /SIDEBAR -->
+    <div id="main-content">
+        <div id="content" class="col-lg-12">
+            <!-- PAGE HEADER-->
+            <div class="row">
+                <div class="col-sm-12 page-header">
+                    <!-- BREADCRUMBS -->
+                    <ul class="breadcrumb">
+                        <li class="nav-font">
+                            会员管理
+                        </li>
+                        <li class="nav-font" id="navName"></li>
+                    </ul>
+                    <!-- /BREADCRUMBS -->
+
+                </div>
+            </div>
+            <!-- /PAGE HEADER -->
+            <!-- SAMPLE -->
+            <div class="row row-padding">
+                <div style="border-bottom:1px solid #e6e6e6;margin-bottom: 1rem;padding-bottom: 0.66rem;">
+                    <img id="headimgurl" style="position: absolute;width: 5.33rem;height: 5.33rem;"/>
+                    <span style="margin-left: 6.66rem;display: inline-block;margin-top: 0.4rem;">
+								<span class="" style="font-size: 1.2rem;" id="name"></span>
+								<p>手机号：<span id="phone"></span></p>
+							</span>
+                </div>
+                <div class="col-md-12" style="margin-bottom: 1.66rem;display: inline-block;">
+                    <div class="btn-group header-tab">
+                        <button class="btn btn-item tab-button btn-item-checked" data-id="behavior" data-init="2">行为分析
+                        </button>
+                        <button class="btn btn-item tab-button" data-id="basicInfo" data-init="2">基本信息</button>
+                        <button class="btn btn-item tab-button" data-id="orderInfo" data-init="1">预约课程</button>
+                        <button class="btn btn-item tab-button" data-id="expenseInfo" data-init="1">消费记录</button>
+                    </div>
+                </div>
+                <div class="col-md-12 box-body" id="behavior">
+                    <div class="layui-form-item">
+                        <div class="margin-right-15"
+                             style="background: url(../images/red.png); background-size:cover;width: 16.4rem;height: 7.06rem;color: white;padding:1.33rem 0 0 2rem ;display:inline-block;">
+                            <span style="font-size: 0.8rem;">消费总金额</span><br>
+                            <span style="font-size: 1.46rem;">￥<span id="totalAmount"></span></span><br>
+                            <span style="font-size: 0.8rem;">本月消费￥<span id="monthAmount"></span></span>
+                        </div>
+                        <div style="background: url(../images/blue.png); background-size:cover;width: 16.4rem;height: 7.06rem;color: white;padding:1.33rem 0 0 2rem ;display:inline-block;">
+                            <span style="font-size: 0.8rem;">本月上课数</span><br>
+                            <span style="font-size: 1.46rem;" id="monthNum"></span><br>
+                            <span style="font-size: 0.8rem;">&nbsp;</span>
+                        </div>
+                    </div>
+                    <div style="border-bottom:1px solid #e6e6e6;margin-bottom: 1rem;padding-bottom: 0.66rem;">
+								<span style="display: inline-block;margin-top: 0.4rem;">
+									<span class="margin-left-15" style="font-size: 1.2rem;">预约情况</span>
+								</span>
+                    </div>
+                    <div class="margin-left-15" style="margin-bottom: 1.66rem;display: inline-block;">
+                        <div class="btn-group header-tab" id="order-div">
+                            <button class="btn btn-item btn-item-checked" data-days="30">近30天</button>
+                            <button class="btn btn-item" data-days="60">近60天</button>
+                            <button class="btn btn-item margin-right-15" data-days="90">近90天</button>
+                            <input placeholder="自定义时间" class="chart-date Wdate phone-width-50" id="orderStart"
+                                   onchange="void(0);" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'orderEnd\')}'})">
+                            &nbsp;至&nbsp;
+                            <input placeholder="自定义时间" class="chart-date Wdate phone-width-50" id="orderEnd"
+                                   onchange="void(0);" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'orderStart\')}'})">
+                        </div>
+                    </div>
+                    <div class="pull-right margin-right-15" style="margin-bottom: 1.66rem;display: inline-block;">
+                        <div class="btn-group header-tab">
+                            <button class="btn btn-item tab-time btn-item-checked" data-type="1">
+                                按周
+                            </button>
+                            <button class="btn btn-item tab-time" data-type="2">按月</button>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="order" style="width: auto;height:26.66rem;"></div>
+                    </div>
+                    <div style="border-bottom:1px solid #e6e6e6;margin-bottom: 1rem;padding-bottom: 0.66rem;">
+							<span class="phone-top" style="display: inline-block;margin-top: 0.4rem;">
+								<span class="margin-left-15" style="font-size: 1.2rem;">上课时间</span>
+							</span>
+                    </div>
+                    <div class="margin-left-15" style="margin-bottom: 1.66rem;display: inline-block;">
+                        <div class="btn-group header-tab" id="class-div">
+                            <button class="btn btn-item btn-item-checked" data-days="30">近30天</button>
+                            <button class="btn btn-item" data-days="60">近60天</button>
+                            <button class="btn btn-item margin-right-15" data-days="90">近90天</button>
+                            <input placeholder="自定义时间" class="chart-date Wdate phone-width-50" id="classStart"
+                                   onchange="void(0);" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'classEnd\')}'})">
+                            &nbsp;至&nbsp;
+                            <input placeholder="自定义时间" class="chart-date Wdate phone-width-50" id="classEnd"
+                                   onchange="void(0);" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'classStart\')}'})">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="classHour" style="width: auto;height:26.66rem;"></div>
+                    </div>
+                </div>
+                <div class="col-md-12 box-body hidden" id="basicInfo">
+                    <div class="layui-form-item">
+                        <span class="span-title">状态</span>
+                        <span class="span-content" id="status"></span>
+                    </div>
+                    <div class="layui-form-item">
+                        <span class="span-title">会员卡</span>
+                        <span class="span-content detail-content" id="cardList"></span>
+                    </div>
+                    <div class="layui-form-item">
+                        <span class="span-title">个人介绍</span>
+                        <span class="span-content detail-content" id="intro"></span>
+                    </div>
+                </div>
+                <div class="col-md-12 box-body hidden" id="orderInfo">
+                    <div class="layui-span-block-small">
+                        <span class="condition-span">
+                            <span class="">
+                                <select id="courseType" class="conditions common-select calendar-condition">
+                                    <option value="">课程类型</option>
+                                    <option value="1">团课</option>
+                                    <option value="2">私教</option>
+                                </select>
+                            </span>
+                            <span class="">
+                                <select id="coachId" class="conditions common-select calendar-condition">
+                                    <option value="">教练</option>
+                                </select>
+                            </span>
+                            <span class="phone-width">
+                                <input placeholder="课程时间" class="search input-date Wdate conditions" id="startDate"
+                                       onchange="void(0);" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'endDate\')}'})">
+                                &nbsp;至&nbsp;
+                                <input placeholder="课程时间" class="search input-date Wdate conditions" id="endDate"
+                                       onchange="void(0);" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'startDate\')}'})">
+                            </span>
+                            <span class="">
+                                <select id="gymId" class="conditions common-select gymId">
+                                    <option value="">门店名称</option>
+                                </select>
+                            </span>
+                            <span class="">
+                                <select id="orderStatus" class="conditions common-select">
+                                    <option value="">预约状态</option>
+                                    <option value="4">预约</option>
+                                    <option value="3">退课</option>
+                                </select>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="divide-20"></div>
+                    <div>
+                        <table id="orderInfo_table" class="display cell-border">
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-12 box-body hidden" id="expenseInfo">
+                    <div class="layui-span-block-small">
+                        <span class="condition-span">
+                            <span class="">
+                                <select id="orderType" class="conditions common-select calendar-condition">
+                                    <option value="">消费类型</option>
+                                    <option value="1">购买课程</option>
+                                    <option value="2">购买会员卡</option>
+                                </select>
+                            </span>
+                            <span class="">
+                                <select id="gym" class="conditions common-select gymId">
+                                    <option value="">门店名称</option>
+                                </select>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="divide-20"></div>
+                    <div>
+                        <table id="expenseInfo_table" class="display cell-border">
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- /SAMPLE -->
+        </div>
+        <!-- /CONTENT-->
+    </div>
+</section>
+
+<!--/PAGE -->
+<script src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../plugins/layer/layer.js"></script>
+<script src="../plugins/datatables/1.10.15/jquery.dataTables.js"></script>
+<script src="../js/echarts.common.min.js"></script>
+<script type="text/javascript" src="../plugins/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript" src="../js/pages/userDetail.js"></script>
+</body>
+
+</html>

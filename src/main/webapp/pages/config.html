@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top" />
+		<title>全局设置</title>
+		<link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" type="text/css" href="../css/style.css">
+		<link href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<!-- HEADER -->
+		<header class="navbar clearfix" id="header">
+			<div class="container">
+				<div class="navbar-brand">
+					<img class="text-logo" src="../images/logo.png">
+					<span>Hyperfit 管理系统</span>
+				</div>
+				<ul class="nav navbar-nav pull-right">
+					<!-- BEGIN USER LOGIN DROPDOWN -->
+					<li class="dropdown pull-right">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<span class="username" id="navUser">个人信息管理</span>
+							<i class="fa fa-angle-down pull-down-icon"></i>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a id="resetPwd">修改密码</a>
+							</li>
+							<li>
+								<a id="logoutBtn">退出登录</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</header>
+		<!--/HEADER -->
+		<!-- PAGE -->
+		<section id="page">
+			<!-- SIDEBAR -->
+			<div id="sidebar" class="sidebar">
+				<div class="sidebar-menu nav-collapse">
+					<div class="menu-header">
+						<i class="fa fa-bars menu-icon"></i>
+					</div>
+					<!-- SIDEBAR MENU -->
+					<ul id="sideMenu" data-pageid='63'>
+					</ul>
+					<!-- /SIDEBAR MENU -->
+				</div>
+			</div>
+			<!-- /SIDEBAR -->
+			<div id="main-content">
+				<div id="content" class="col-lg-12">
+					<!-- SAMPLE -->
+					<div class="row row-padding">
+						<div class="divide-20"></div>
+						<div class="col-md-12">
+							<div class="layui-form-item div-border">
+								<span class="div-title">品牌名称</span>
+								<p class="span-content">品牌名称<span class="span-content" id="brandName"></span><button type="button" class="btn btn-default" style="float: right;margin-top: -0.56rem;" id="editBrandName">编辑</button></p>
+							</div>
+							<div class="layui-form-item div-border">
+								<span class="div-title">会员协议</span>
+								<p class="span-content">会员协议<span class="span-content" id="agreementName"></span><button type="button" class="btn btn-default" style="float: right;margin-top: -0.56rem;" id="editAgreement">编辑</button></p>
+							</div>
+							<div class="layui-form-item div-border">
+								<span class="div-title">预约课程设置</span>
+								<p class="span-content">课程可预约时间点<span class="span-content" id="onOrderTime"></span></p>
+								<p class="span-content">课程截止预约<span class="span-content"  id="offOrderTime"></span><button type="button" class="btn btn-default" style="float: right;margin-top: -0.56rem;" id="editOrder">编辑</button></p>
+							</div>
+							<div class="layui-form-item div-border">
+								<span class="div-title">会员卡简介设置</span>
+								<p>
+									<span class="span-content" >会员卡A名称</span>
+									<span class="span-content" id="valueCardName"></span>
+									<button type="button" data-id="value" class="btn btn-default cardBtn" style="float: right;margin-top: -0.56rem;">编辑</button>
+								</p>
+								<p>
+									<span class="span-content" style="vertical-align: top;">会员卡A简介</span>
+									<span class="span-content detail-content" id="valueCardIntro"></span>
+								</p>
+								<p>
+									<span class="span-content">会员卡B名称</span>
+									<span class="span-content" id="numberCardName"></span>
+									<button type="button" data-id="number" class="btn btn-default cardBtn" style="float: right;margin-top: -0.56rem;">编辑</button>
+								</p>
+								<p>
+									<span class="span-content" style="vertical-align: top;">会员卡A简介</span>
+									<span class="span-content detail-content" id="numberCardIntro"></span>
+								</p>
+							</div>
+						</div>
+					</div>
+					<!-- /SAMPLE -->
+				</div>
+				<!-- /CONTENT-->
+			</div>
+		</section>
+		<!-- 品牌名称弹窗 -->
+		<div id="brandName-box" style="display: none;">
+			<div class="divide-20">
+			</div>
+			<div class="col-md-12">
+				<div class="layui-form-item">
+					<label for="brand" class="layui-form-label">品牌名称</label>
+					<div class="layui-input-block margin-left-80">
+						<input class="layui-input" id="brand" placeholder="输入品牌名称" maxlength="20">
+					</div>
+				</div>
+			</div>
+		</div>
+        <!-- 会员协议弹窗 -->
+        <div id="agreement-box" style="display: none;">
+            <div class="divide-20">
+            </div>
+            <div class="col-md-12">
+                <div class="layui-form-item">
+                    <label for="agreement_name" class="layui-form-label">协议名称</label>
+                    <div class="layui-input-block margin-left-80">
+                        <input class="layui-input" id="agreement_name" placeholder="输入协议名称" maxlength="30">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="agreement" class="layui-form-label">协议详情</label>
+                    <div class="layui-input-block margin-left-80">
+                        <textarea class="layui-textarea" style="height: 26rem;" id="agreement" placeholder="输入协议文字" maxlength="8000"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 预约课程弹窗 -->
+        <div id="order-box" style="display: none;">
+            <div class="divide-20">
+            </div>
+            <div class="col-md-12">
+                <div class="layui-form-item">
+                    <label for="startHour" class="layui-form-label">课程可预约时间点</label>
+                    <div class="layui-input-block margin-left-80">
+                        <select class="layui-select-small" id="startHour" >
+                            <option value="0">立即</option>
+                            <option value="1">1小时</option>
+                            <option value="2">2小时</option>
+                            <option value="3">3小时</option>
+                            <option value="4">4小时</option>
+                            <option value="5">5小时</option>
+                            <option value="6">6小时</option>
+                            <option value="7">7小时</option>
+                            <option value="8">8小时</option>
+                            <option value="9">9小时</option>
+                            <option value="10">10小时</option>
+                            <option value="11">11小时</option>
+                            <option value="12">12小时</option>
+                            <option value="13">13小时</option>
+                            <option value="14">14小时</option>
+                            <option value="15">15小时</option>
+                            <option value="16">16小时</option>
+                            <option value="17">17小时</option>
+                            <option value="18">18小时</option>
+                            <option value="19">19小时</option>
+                            <option value="20">20小时</option>
+                            <option value="21">21小时</option>
+                            <option value="22">22小时</option>
+                            <option value="23">23小时</option>
+                            <option value="24">24小时</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="endHour" class="layui-form-label">课程截止预约</label>
+                    <div class="layui-input-block margin-left-80">
+                        开课前&nbsp;<select class="layui-select-small" id="endHour" >
+                            <option value="1">1小时</option>
+                            <option value="2">2小时</option>
+                            <option value="3">3小时</option>
+                            <option value="4">4小时</option>
+                            <option value="5">5小时</option>
+                            <option value="6">6小时</option>
+                            <option value="7">7小时</option>
+                            <option value="8">8小时</option>
+                            <option value="9">9小时</option>
+                            <option value="10">10小时</option>
+                            <option value="11">11小时</option>
+                            <option value="12">12小时</option>
+                            <option value="13">13小时</option>
+                            <option value="14">14小时</option>
+                            <option value="15">15小时</option>
+                            <option value="16">16小时</option>
+                            <option value="17">17小时</option>
+                            <option value="18">18小时</option>
+                            <option value="19">19小时</option>
+                            <option value="20">20小时</option>
+                            <option value="21">21小时</option>
+                            <option value="22">22小时</option>
+                            <option value="23">23小时</option>
+                            <option value="24">24小时</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- 会员卡简介弹窗 -->
+		<div id="card-box" style="display: none;">
+			<div class="divide-20">
+			</div>
+			<div class="col-md-12">
+				<div class="layui-form-item">
+					<label for="cardName" class="layui-form-label">名称</label>
+					<div class="layui-input-block margin-left-80">
+						<input class="layui-input" id="cardName" placeholder="输入会员卡名称" maxlength="15">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label  class="layui-form-label">简介</label>
+					<div class="layui-input-block margin-left-80" style="margin-bottom: 1rem;">
+						<input class="layui-input" id="introA" placeholder="输入套餐简介1" maxlength="15">
+					</div>
+					<div class="layui-input-block margin-left-80" style="margin-bottom: 1rem;">
+						<input class="layui-input" id="introB" placeholder="输入套餐简介2" maxlength="15">
+					</div>
+					<div class="layui-input-block margin-left-80" style="margin-bottom: 1rem;">
+						<input class="layui-input" id="introC" placeholder="输入套餐简介3" maxlength="15">
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--/PAGE -->
+		<script src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../plugins/layer/layer.js"></script>
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/pages/config.js"></script>
+	</body>
+
+</html>

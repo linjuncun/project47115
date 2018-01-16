@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TCourseActionMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TCourseAction">
+        <id column="action_id" jdbcType="BIGINT" property="actionId"/>
+        <result column="course_id" jdbcType="BIGINT" property="courseId"/>
+        <result column="actions" jdbcType="VARCHAR" property="actions"/>
+        <result column="times" jdbcType="VARCHAR" property="times"/>
+        <result column="intervals" jdbcType="VARCHAR" property="intervals"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    </resultMap>
+    <!--查询课程动作-->
+    <select id="getCourseAction" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from t_course_action
+        where course_id = #{courseId,jdbcType=BIGINT}
+    </select>
+
+    <!-- 添加课程动作 -->
+    <insert id="addCourseAction" parameterType="com.hyperfit.entity.TCourseAction">
+        insert into t_course_action
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="actionId != null">
+                action_id,
+            </if>
+            <if test="courseId != null">
+                course_id,
+            </if>
+            <if test="actions != null">
+                actions,
+            </if>
+            <if test="times != null">
+                times,
+            </if>
+            <if test="intervals != null">
+                intervals,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="actionId != null">
+                #{actionId,jdbcType=BIGINT},
+            </if>
+            <if test="courseId != null">
+                #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="actions != null">
+                #{actions,jdbcType=VARCHAR},
+            </if>
+            <if test="times != null">
+                #{times,jdbcType=VARCHAR},
+            </if>
+            <if test="intervals != null">
+                #{intervals,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新课程动作  -->
+    <update id="updateCourseAction" parameterType="com.hyperfit.entity.TCourseAction">
+        update t_course_action
+        <set>
+            <if test="courseId != null">
+                course_id = #{courseId,jdbcType=BIGINT},
+            </if>
+            <if test="actions != null">
+                actions = #{actions,jdbcType=VARCHAR},
+            </if>
+            <if test="times != null">
+                times = #{times,jdbcType=VARCHAR},
+            </if>
+            <if test="intervals != null">
+                intervals = #{intervals,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where action_id = #{actionId,jdbcType=BIGINT}
+    </update>
+    <!-- 批量删除数据 -->
+    <delete id="delCourseAction" parameterType="map">
+        delete from t_course_action
+        where action_id IN (${actionIds})
+    </delete>
+</mapper>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top"/>
+    <title>首页看板</title>
+    <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../plugins/datatables/1.10.15/jquery.dataTables.css" rel="stylesheet"/>
+</head>
+
+<body>
+<!-- HEADER -->
+<header class="navbar clearfix" id="header">
+    <div class="container">
+        <div class="navbar-brand">
+            <img class="text-logo" src="../images/logo.png">
+            <span>Hyperfit 管理系统</span>
+        </div>
+        <ul class="nav navbar-nav pull-right">
+            <!-- BEGIN USER LOGIN DROPDOWN -->
+            <li class="dropdown pull-right">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="username" id="navUser">个人信息管理</span>
+                    <i class="fa fa-angle-down pull-down-icon"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a id="resetPwd">修改密码</a>
+                    </li>
+                    <li>
+                        <a id="logoutBtn">退出登录</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</header>
+<!--/HEADER -->
+<!-- PAGE -->
+<section id="page">
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-menu nav-collapse">
+			<div class="menu-header">
+				<i class="fa fa-bars menu-icon"></i>
+			</div>
+            <!-- SIDEBAR MENU -->
+            <ul id="sideMenu" data-pageid='66'>
+            </ul>
+            <!-- /SIDEBAR MENU -->
+        </div>
+    </div>
+    <!-- /SIDEBAR -->
+    <div id="main-content">
+        <div id="content" class="col-lg-12">
+            <!-- SAMPLE -->
+           <div class="row row-padding">
+				<div style="border-bottom:1px solid #e6e6e6;margin: 1.66rem 0 1rem;padding-bottom: 1rem;">
+					<span class="margin-left-15" style="font-size: 1.4rem;">总收入</span></span>
+					<select id="totalSelect" class="layui-select-small pull-right margin-right-15" style="height: 1.73rem;padding: 0 0.53rem;">
+						<option value="7">过去7天</option>
+						<option value="30">过去30天</option>
+						<option value="60">过去60天</option>
+						<option value="90">过去90天</option>
+						<option value="365">过去一年</option>
+					</select>
+				</div>
+                <div class="col-md-12">
+                    <div >
+						<div class="phone-width chart-div">
+							<span id="total" class="margin-left-15" style="font-size:1.66rem ;color:#64C386 ;font-weight: 600;"></span><span style="font-size: 0.86rem;">元</span><br>
+							<span class="margin-left-15 nav-font" style="font-size: 0.86rem;">销售总收入</span>
+						</div>
+						<div class="phone-width-50" style="width: 9rem;float: left;">
+							<div id="courseTotal" style="width: auto;height:6.66rem;"></div>
+						</div>
+						<div class="phone-width-50 chart-div1">
+							<span id="courseAmount" class="margin-left-15" style="font-size:1.66rem ;font-weight: 600;"></span><span style="font-size: 0.86rem;">元</span><br>
+							<span class="margin-left-15 nav-font" style="font-size: 0.86rem;">课程预约</span><br>
+							<span class="margin-left-15 nav-font" style="font-size: 0.86rem;">(仅含在线支付约课)</span>
+						</div>
+						<div class="phone-width-50" style="width: 9rem;float: left;">
+							<div id="cardTotal" style="width: auto;height:6.66rem;"></div>
+						</div>
+						<div class="phone-width-50 chart-div1">
+							<span id="cardAmount" class="margin-left-15" style="font-size:1.66rem ;font-weight: 600;"></span><span style="font-size: 0.86rem;">元</span><br>
+							<span class="margin-left-15 nav-font" style="font-size: 0.86rem;">会员卡销售</span>
+						</div>
+                    </div>
+                </div>
+				<div class="col-md-12">
+                    <div style="border-top:1px solid #e6e6e6;margin: 1.66rem 0px;display: inline-block;">
+						<div class="phone-width" style="width: 40%;border-right: 1px solid #e6e6e6;float:left;">
+							<div style="width:100%;float: left;border-bottom:1px solid #e6e6e6;padding:1rem 0;">
+								<span class="" style="font-size:1.26rem;">会员卡销售收入</span>
+								<select id="cardSelect" class="layui-select-small pull-right margin-right-15" style="height: 1.73rem;padding: 0 0.53rem;">
+									<option value="7">过去7天</option>
+									<option value="30">过去30天</option>
+									<option value="60">过去60天</option>
+									<option value="90">过去90天</option>
+									<option value="365">过去一年</option>
+								</select>
+							</div>
+							<div style="float: left;width: 100%;">
+								<div id="card" style="width: auto;height:13.33rem;"></div>
+							</div>
+						</div>
+						<div class="phone-width" style="width: 60%;float:left;">
+							<div style="width:100%;float: left;border-bottom:1px solid #e6e6e6;padding:1rem 1rem;">
+								<span class="" style="font-size:1.26rem;">课程数量</span>
+								<select id="courseSelect" class="layui-select-small pull-right" style="height: 1.73rem;padding: 0 0.53rem;">
+									<option value="7">过去7天</option>
+									<option value="30">过去30天</option>
+									<option value="60">过去60天</option>
+									<option value="90">过去90天</option>
+									<option value="365">过去一年</option>
+								</select>
+							</div>
+							<div style="float: left;width: 100%;padding-top:0.66rem;">
+								<div style="width: 20%;margin-top: 2.33rem;float: left;padding-left: 1.33rem;">
+									<span id="courseNum" style="font-size:1.66rem;"></span><br>
+									<span class="nav-font" style="font-size: 0.86rem;">课程总节数</span><br><br>
+									<span id="orderNum" style="font-size:1.66rem;"></span><br>
+									<span class="nav-font" style="font-size: 0.86rem;">服务总人次</span>
+								</div>
+								<div id="course" style="width:80%;height:13.33rem;display: inline-block;"></div>
+							</div>
+						</div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div style="border-top:1px solid #e6e6e6;margin: 1.66rem 0px;"> 
+						<div class="phone-width" style="width: 50%;border-right: 1px solid #e6e6e6;float:left;">
+							<div style="width:100%;float: left;border-bottom:1px solid #e6e6e6;padding:1rem 0;">
+								<span class="" style="font-size:1.26rem;">会员转化</span>
+								<select id="userSelect" class="layui-select-small pull-right margin-right-15" style="height: 1.73rem;padding: 0 0.53rem;">
+									<option value="7">过去7天</option>
+									<option value="30">过去30天</option>
+									<option value="60">过去60天</option>
+									<option value="90">过去90天</option>
+									<option value="365">过去一年</option>
+								</select>
+							</div>
+							<div style="float: left;width: 100%;">
+								<div id="user" style="width: auto;height:13.33rem;"></div>
+							</div>
+						</div>
+						<div class="phone-width" style="width: 50%;float:left;">
+							<div style="width:100%;float: left;border-bottom:1px solid #e6e6e6;padding:1.1rem 0 1rem 1rem;">
+								<span class="" style="font-size:1.26rem;">当前会员卡状态</span>
+							</div>
+							<div style="float: left;width: 100%;">
+								<div id="userStatus" style="width:auto;height:13.33rem;"></div>
+							</div>
+						</div>
+                    </div>
+                </div>
+            </div>
+            <!-- /SAMPLE -->
+        </div>
+        <!-- /CONTENT-->
+    </div>
+</section>
+
+<!--/PAGE -->
+<script src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../plugins/layer/layer.js"></script>
+<script src="../plugins/datatables/1.10.15/jquery.dataTables.js"></script>
+<script src="../js/echarts.common.min.js"></script>
+<script type="text/javascript" src="../plugins/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript" src="../js/pages/overview.js"></script>
+</body>
+
+</html>

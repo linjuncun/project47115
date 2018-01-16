@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TCouponMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TCoupon">
+        <id column="coupon_id" jdbcType="INTEGER" property="couponId"/>
+        <result column="coupon_name" jdbcType="VARCHAR" property="couponName"/>
+        <result column="send_type" jdbcType="INTEGER" property="sendType"/>
+        <result column="coupon_value" jdbcType="INTEGER" property="couponValue"/>
+        <result column="indate" jdbcType="INTEGER" property="indate"/>
+        <result column="coupon_status" jdbcType="INTEGER" property="couponStatus"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="user_coupon_id" jdbcType="INTEGER" property="userCouponId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+    </resultMap>
+    <!--查询优惠券-->
+    <select id="getCoupon" parameterType="map" resultMap="BaseResultMap">
+        select tc.*
+        from t_coupon tc
+        where tc.coupon_status = 1
+        <if test="couponId != null and couponId != '' ">
+            AND tc.coupon_id = #{couponId,jdbcType=INTEGER}
+        </if>
+        <if test="sendType != null and sendType != '' ">
+            AND tc.send_type = #{sendType,jdbcType=INTEGER}
+        </if>
+        <if test="couponStatus != null and couponStatus != '' ">
+            AND tc.coupon_status = #{couponStatus,jdbcType=INTEGER}
+        </if>
+        <if test="couponName != null and couponName != '' ">
+            AND tc.coupon_name = #{couponName}
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_coupon
+        where coupon_id = #{couponId,jdbcType=INTEGER}
+    </delete>
+
+    <!--新增优惠券-->
+    <insert id="insertCoupon" parameterType="com.hyperfit.entity.TCoupon">
+        insert into t_coupon
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="couponId != null">
+                coupon_id,
+            </if>
+            <if test="couponName != null">
+                coupon_name,
+            </if>
+            <if test="sendType != null">
+                send_type,
+            </if>
+            <if test="couponValue != null">
+                coupon_value,
+            </if>
+            <if test="indate != null">
+                indate,
+            </if>
+            <if test="couponStatus != null">
+                coupon_status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="couponId != null">
+                #{couponId,jdbcType=INTEGER},
+            </if>
+            <if test="couponName != null">
+                #{couponName,jdbcType=VARCHAR},
+            </if>
+            <if test="sendType != null">
+                #{sendType,jdbcType=INTEGER},
+            </if>
+            <if test="couponValue != null">
+                #{couponValue,jdbcType=INTEGER},
+            </if>
+            <if test="indate != null">
+                #{indate,jdbcType=INTEGER},
+            </if>
+            <if test="couponStatus != null">
+                #{couponStatus,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--修改优惠券-->
+    <update id="updateCoupon" parameterType="map">
+        update t_coupon
+        <set>
+            <if test="record.couponId != null">
+                coupon_id = #{record.couponId,jdbcType=INTEGER},
+            </if>
+            <if test="record.couponName != null">
+                coupon_name = #{record.couponName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.sendType != null">
+                send_type = #{record.sendType,jdbcType=INTEGER},
+            </if>
+            <if test="record.couponValue != null">
+                coupon_value = #{record.couponValue,jdbcType=INTEGER},
+            </if>
+            <if test="record.indate != null">
+                indate = #{record.indate,jdbcType=INTEGER},
+            </if>
+            <if test="record.couponStatus != null">
+                coupon_status = #{record.couponStatus,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE coupon_id = #{record.couponId,jdbcType=INTEGER}
+    </update>
+
+    <!--查询用户优惠券-->
+    <select id="getUserCoupon" parameterType="map" resultMap="BaseResultMap">
+        select tuc.user_coupon_id
+        ,tuc.create_time,tuc.user_id,tuc.status,tc.indate,tc.send_type,tc.coupon_status,tu.name,
+        tc.coupon_id,tc.coupon_name,tc.coupon_value,DATE_ADD(tuc.create_time,INTERVAL tc.indate DAY) deadline
+        from t_user_coupon tuc
+        LEFT JOIN t_coupon tc ON tuc.coupon_id = tc.coupon_id
+        LEFT JOIN t_user tu ON tuc.user_id = tu.user_id
+        where 1 = 1
+        <if test="userId != null and userId != '' ">
+            AND tuc.user_id = #{userId}
+        </if>
+        <if test="userCouponId != null and userCouponId != '' ">
+            AND tuc.user_coupon_id = #{userCouponId}
+        </if>
+        <if test="status != null and status != '' ">
+            AND tuc.status = #{status}
+        </if>
+        <if test="couponId != null and couponId != '' ">
+            AND tuc.coupon_id = #{couponId}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tuc.create_time) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tuc.create_time)
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            and tu.name like concat('%', #{conditions}, '%')
+        </if>
+        <if test='queryType == "1" '>
+            AND DATE_ADD(tuc.create_time,INTERVAL tc.indate DAY) >= now()
+        </if>
+        <if test='queryType == "2" '>
+            AND now() > DATE_ADD(tuc.create_time,INTERVAL tc.indate DAY)
+        </if>
+    </select>
+    <!--新增用户优惠券-->
+    <insert id="addUserCoupon" parameterType="com.hyperfit.entity.TCoupon">
+        insert into t_user_coupon
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userCouponId != null">
+                user_coupon_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="couponId != null">
+                coupon_id,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userCouponId != null">
+                #{userCouponId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="couponId != null">
+                #{couponId,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--修改用户优惠券-->
+    <update id="updateUserCoupon" parameterType="map">
+        update t_user_coupon
+        <set>
+            <if test="record.userCouponId != null">
+                user_coupon_id = #{record.userCouponId,jdbcType=INTEGER},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=INTEGER},
+            </if>
+            <if test="record.couponId != null">
+                coupon_id = #{record.couponId,jdbcType=INTEGER},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE user_coupon_id = #{record.userCouponId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SysConfigMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.SysConfig">
+        <result column="brand_name" jdbcType="VARCHAR" property="brandName"/>
+        <result column="agreement_name" jdbcType="VARCHAR" property="agreementName"/>
+        <result column="agreement" jdbcType="VARCHAR" property="agreement"/>
+        <result column="on_order_time" jdbcType="INTEGER" property="onOrderTime"/>
+        <result column="off_order_time" jdbcType="INTEGER" property="offOrderTime"/>
+        <result column="value_card_name" jdbcType="VARCHAR" property="valueCardName"/>
+        <result column="value_card_intro" jdbcType="VARCHAR" property="valueCardIntro"/>
+        <result column="number_card_name" jdbcType="VARCHAR" property="numberCardName"/>
+        <result column="number_card_intro" jdbcType="VARCHAR" property="numberCardIntro"/>
+    </resultMap>
+    <!-- 查询系统配置信息 -->
+    <select id="getSysConfig" parameterType="map" resultMap="BaseResultMap">
+      select *
+      from sys_config
+    </select>
+    <!-- 修改系统配置 -->
+    <update id="updateSysConfig" parameterType="map">
+        update sys_config
+        <set>
+            <if test="record.brandName != null">
+                brand_name = #{record.brandName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.agreementName != null">
+                agreement_name = #{record.agreementName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.agreement != null">
+                agreement = #{record.agreement,jdbcType=VARCHAR},
+            </if>
+            <if test="record.onOrderTime != null">
+                on_order_time = #{record.onOrderTime,jdbcType=INTEGER},
+            </if>
+            <if test="record.offOrderTime != null">
+                off_order_time = #{record.offOrderTime,jdbcType=INTEGER},
+            </if>
+            <if test="record.valueCardName != null">
+                value_card_name = #{record.valueCardName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.valueCardIntro != null">
+                value_card_intro = #{record.valueCardIntro,jdbcType=VARCHAR},
+            </if>
+            <if test="record.numberCardName != null">
+                number_card_name = #{record.numberCardName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.numberCardIntro != null">
+                number_card_intro = #{record.numberCardIntro,jdbcType=VARCHAR},
+            </if>
+        </set>
+    </update>
+
+    <!-- 获取session值 -->
+    <select id="getSessionByKey" parameterType="map" resultType="java.lang.String">
+        select session_value
+        from t_session
+        where openid = #{openid}
+        and session_key = #{key}
+    </select>
+
+    <insert id="addSession" parameterType="map">
+        insert into t_session
+        (openid,session_key,session_value)
+        values
+        (#{openid},#{key},#{value})
+    </insert>
+
+    <update id="updateSession" parameterType="map">
+        update t_session set session_value = #{value}
+        where openid = #{openid}
+        and session_key = #{key}
+    </update>
+
+    <!--查询用户消费概览-->
+    <select id="getUserView" parameterType="map" resultType="map">
+       SELECT
+        (SELECT SUM(amount) FROM t_order WHERE  user_id = #{userId} AND order_type =1 AND STATUS=3) totalAmount,
+        (SELECT SUM(amount) FROM t_order WHERE  user_id = #{userId} AND order_type =1 AND STATUS=3 AND MONTH(create_time)= MONTH(NOW())) monthAmount,
+        (SELECT COUNT(tc.course_id) FROM t_order tor LEFT JOIN t_course tc ON tor.course_id= tc.course_id  WHERE  tor.user_id = #{userId} AND tor.status=3 AND MONTH(tc.class_hour)= MONTH(NOW())) monthNum
+         FROM DUAL
+    </select>
+
+    <!--查询用户预约情况报表-->
+    <select id="getOrderView" parameterType="map" resultType="map">
+        SELECT tt.course_type courseType,tc.type,COUNT(tor.course_id) orderNum,YEAR(tor.create_time) orderYear
+        <if test='groupType == "1" '>
+            ,WEEK(tor.create_time) orderWeek
+        </if>
+        <if test='groupType == "2" '>
+            ,concat(MONTH (tor.create_time),'月') orderMonth
+        </if>
+        FROM t_order tor
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        LEFT JOIN t_template tt ON tc.template_id=tt.template_id
+        WHERE 1 = 1
+        <if test="userId != null and userId != '' ">
+            AND tor.user_id = #{userId}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tor.create_time) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tor.create_time)
+        </if>
+        <if test="orderType != null and orderType != '' ">
+            AND tor.order_type IN (${orderType})
+        </if>
+        <if test="status != null and status != '' ">
+            AND tor.status in (${status})
+        </if>
+        <!--按周查询-->
+        <if test='groupType == "1" '>
+            GROUP BY WEEK(tor.create_time)
+        </if>
+        <!--按月查询-->
+        <if test='groupType == "2" '>
+            GROUP BY MONTH (tor.create_time)
+        </if>
+        ,tt.course_type,tc.type
+    </select>
+
+    <!--查询上课时间报表-->
+    <select id="getClassHourView" parameterType="map" resultType="map">
+        SELECT  COUNT(tor.course_id) classNum,HOUR(tc.class_hour) classHour
+        FROM t_order tor
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        WHERE tor.user_id = #{userId}
+        AND tor.order_type = 1
+        AND tor.status = 3
+        <if test="startDate != null and startDate != '' ">
+            and Date(tor.create_time) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tor.create_time)
+        </if>
+        GROUP BY HOUR(tc.class_hour)
+    </select>
+
+    <!--查询总收入-->
+    <select id="getTotalView" parameterType="map" resultType="map">
+        SELECT
+        (SELECT SUM(amount) FROM t_order WHERE order_type =1 AND STATUS=3
+            AND Date(create_time) >= Date(#{startDate})
+            AND Date(#{endDate}) >= Date(create_time)
+        ) courseAmount,
+        (SELECT SUM(amount) FROM t_order WHERE order_type =2 AND STATUS=3
+            AND Date(create_time) >= Date(#{startDate})
+            AND Date(#{endDate}) >= Date(create_time)
+        ) cardAmount
+        FROM DUAL
+    </select>
+
+    <!--查询会员卡销售收入报表-->
+    <select id="getCardView" parameterType="map" resultType="map">
+        SELECT SUM(tor.amount) amount,tp.card_type cardType
+        FROM t_order tor
+         LEFT JOIN t_package tp ON tor.package_id = tp.package_id
+        WHERE tor.order_type =2 AND tor.status=3
+        AND Date(tor.create_time) >= Date(#{startDate})
+        AND Date(#{endDate}) >= Date(tor.create_time)
+        GROUP BY tp.card_type
+    </select>
+
+    <!--查询课程总预览-->
+    <select id="getCourseTotal" parameterType="map" resultType="map">
+       SELECT
+        (SELECT COUNT(1) FROM t_course tc  WHERE tc.status = 1 AND tc.type = 1 ) courseNum,
+        (SELECT COUNT(1)  FROM t_order tor
+          LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+          WHERE  tc.status = 1 AND tc.type = 1 AND tor.status = 3
+         ) orderNum
+        FROM dual
+    </select>
+
+    <!--查询课程数量报表-->
+    <select id="getCourseNumView" parameterType="map" resultType="map">
+       SELECT COUNT(1) courseNum,tt.course_type courseType
+        FROM t_course tc
+        LEFT JOIN t_template tt ON tc.template_id=tt.template_id
+        WHERE tc.status = 1 AND tc.type = 1
+        AND Date(tc.class_hour) >= Date(#{startDate})
+        AND Date(#{endDate}) >= Date(tc.class_hour)
+        GROUP BY tt.course_type
+    </select>
+    <!--查询课程服务人次报表-->
+    <select id="getCourseOrderView" parameterType="map" resultType="map">
+        SELECT COUNT(tor.order_id) orderNum,tt.course_type courseType
+         FROM t_order tor
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        LEFT JOIN t_template tt ON tc.template_id=tt.template_id
+        WHERE  tc.status = 1 AND tc.type = 1 AND tor.status = 3
+        AND Date(tc.class_hour) >= Date(#{startDate})
+        AND Date(#{endDate}) >= Date(tc.class_hour)
+        GROUP BY tt.course_type
+    </select>
+    <!--查询会员转化报表-->
+    <select id="getUserCardView" parameterType="map" resultType="map">
+        SELECT
+            (SELECT COUNT(1) FROM t_user tu  WHERE tu.user_type = 1
+              AND Date(tu.create_time) >= Date(#{startDate})
+              AND Date(#{endDate}) >= Date(tu.create_time)
+            ) userNum,
+            (SELECT
+              COUNT(DISTINCT tcc.user_Id)
+            FROM t_user tu
+              LEFT JOIN t_club_card tcc
+                ON tu.user_id = tcc.user_id
+            WHERE tu.user_type = 1
+                AND tcc.card_id IS NOT NULL
+                AND Date(tu.create_time) >= Date(#{startDate})
+                AND Date(#{endDate}) >= Date(tu.create_time)
+            ) cardNum
+            FROM dual
+    </select>
+    <!--查询当前会员卡状态报表-->
+    <select id="getCardStatusView" parameterType="map" resultType="map">
+        SELECT
+        (SELECT COUNT(1) FROM t_club_card tcc WHERE tcc.status = 1) cardNum,
+        (SELECT COUNT(1) FROM t_club_card tcc WHERE tcc.status = 2) stopNum,
+        (SELECT COUNT(1) FROM t_club_card tcc
+        LEFT JOIN t_package tp ON tcc.package_id = tp.package_id
+        WHERE NOW() >= DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY)
+        AND tcc.status = 1 ) datedNum
+        FROM DUAL
+    </select>
+
+</mapper>

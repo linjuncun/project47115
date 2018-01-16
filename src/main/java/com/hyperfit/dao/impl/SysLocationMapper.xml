@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SysLocationMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.SysLocation">
+        <id column="location_id" jdbcType="INTEGER" property="locationId"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="province" jdbcType="VARCHAR" property="province"/>
+        <result column="city" jdbcType="VARCHAR" property="city"/>
+        <result column="district" jdbcType="VARCHAR" property="district"/>
+        <result column="parent" jdbcType="INTEGER" property="parent"/>
+        <result column="isMaxWeight" jdbcType="INTEGER" property="isMaxWeight"/>
+        <collection property="subLoction" javaType="ArrayList" column="locationId=location_id" ofType="Post"
+                    select="selectSubLoction"></collection>
+    </resultMap>
+    <!--查询健身房所在城市列表-->
+    <select id="getGymLocationList" parameterType="map" resultMap="BaseResultMap">
+        SELECT DISTINCT slo.location_id,slo.city,slon.province,slon.location_id provinceId FROM
+        sys_location sl
+        LEFT JOIN sys_location slo ON sl.parent = slo.location_id
+        LEFT JOIN sys_location slon ON slo.parent = slon.location_id
+        LEFT JOIN t_gym tg ON sl.location_id = tg.location_id
+        WHERE tg.gym_id IS NOT NULL
+        AND tg.status = 1
+        ORDER BY slon.location_id
+    </select>
+    <!-- 查询城市中有健身房的区列表 -->
+    <resultMap id="SubMap" type="com.hyperfit.entity.SysLocation">
+        <id column="location_id" jdbcType="INTEGER" property="locationId"/>
+        <result column="district" jdbcType="VARCHAR" property="district"/>
+        <association property="isMaxWeight" javaType="INTEGER" column="location_id"
+                     select="selectMaxWeight"></association>
+    </resultMap>
+    <select id="selectSubLoction" parameterType="map" resultMap="SubMap">
+        SELECT DISTINCT sl.location_id,sl.district
+        FROM sys_location sl
+        LEFT JOIN t_gym tg ON sl.location_id = tg.location_id
+        WHERE tg.gym_id IS NOT NULL
+        AND tg.status = 1
+        AND sl.parent = #{locationId}
+    </select>
+    <!-- 查询健身房是否是权重最高的 -->
+    <select id="selectMaxWeight" parameterType="map" resultType="int">
+        SELECT if(tg.location_id=#{locationId},1,0) isMaxWeight
+        FROM t_gym tg
+        WHERE tg.weight = (SELECT MAX(weight) FROM t_gym WHERE STATUS = 1)
+    </select>
+
+    <!-- 查询地区数据字典 -->
+    <resultMap id="LocationMap" type="com.hyperfit.entity.SysLocation">
+        <id column="location_id" jdbcType="INTEGER" property="locationId"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="province" jdbcType="VARCHAR" property="province"/>
+        <result column="city" jdbcType="VARCHAR" property="city"/>
+        <result column="district" jdbcType="VARCHAR" property="district"/>
+        <result column="parent" jdbcType="INTEGER" property="parent"/>
+        <result column="isMaxWeight" jdbcType="INTEGER" property="isMaxWeight"/>
+    </resultMap>
+    <select id="getLocation" parameterType="map" resultMap="LocationMap">
+        SELECT sl.*
+        FROM sys_location sl
+        WHERE 1 = 1
+        <if test="provinceId != null and provinceId != '' ">
+            AND sl.parent = #{provinceId}
+        </if>
+        <if test="cityId != null and cityId != '' ">
+            AND sl.parent = #{cityId}
+        </if>
+        <!-- 查询所有省份 -->
+        <if test="queryType == 1 ">
+            AND (sl.province != '' AND sl.location_id != 1)
+        </if>
+    </select>
+
+</mapper>

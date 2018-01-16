@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TReturnCashConditionMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TReturnCashCondition">
+        <id column="condition_id" jdbcType="INTEGER" property="conditionId"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="days" jdbcType="INTEGER" property="days"/>
+        <result column="money" jdbcType="INTEGER" property="money"/>
+        <result column="times" jdbcType="INTEGER" property="times"/>
+        <result column="return_cash" jdbcType="INTEGER" property="returnCash"/>
+    </resultMap>
+
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from t_return_cash_condition
+        where condition_id = #{conditionId,jdbcType=INTEGER}
+    </select>
+    <!--删除返现条件-->
+    <delete id="delCondition" parameterType="map">
+        delete from t_return_cash_condition
+        where 1=1
+        <if test="packageId != null and packageId != '' ">
+            AND package_id = #{packageId}
+        </if>
+        <if test="conditionId != null and conditionId != '' ">
+            AND condition_id = #{conditionId,jdbcType=INTEGER}
+        </if>
+    </delete>
+    <!--添加返现条件-->
+    <insert id="addCondition" parameterType="com.hyperfit.entity.TReturnCashCondition">
+        insert into t_return_cash_condition
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="conditionId != null">
+                condition_id,
+            </if>
+            <if test="packageId != null">
+                package_id,
+            </if>
+            <if test="days != null">
+                days,
+            </if>
+            <if test="money != null">
+                money,
+            </if>
+            <if test="times != null">
+                times,
+            </if>
+            <if test="returnCash != null">
+                return_cash,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="conditionId != null">
+                #{conditionId,jdbcType=INTEGER},
+            </if>
+            <if test="packageId != null">
+                #{packageId,jdbcType=INTEGER},
+            </if>
+            <if test="days != null">
+                #{days,jdbcType=INTEGER},
+            </if>
+            <if test="money != null">
+                #{money,jdbcType=INTEGER},
+            </if>
+            <if test="times != null">
+                #{times,jdbcType=INTEGER},
+            </if>
+            <if test="returnCash != null">
+                #{returnCash,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByExampleSelective" parameterType="map">
+        update t_return_cash_condition
+        <set>
+            <if test="record.conditionId != null">
+                condition_id = #{record.conditionId,jdbcType=INTEGER},
+            </if>
+            <if test="record.packageId != null">
+                package_id = #{record.packageId,jdbcType=INTEGER},
+            </if>
+            <if test="record.days != null">
+                days = #{record.days,jdbcType=INTEGER},
+            </if>
+            <if test="record.money != null">
+                money = #{record.money,jdbcType=INTEGER},
+            </if>
+            <if test="record.times != null">
+                times = #{record.times,jdbcType=INTEGER},
+            </if>
+            <if test="record.returnCash != null">
+                return_cash = #{record.returnCash,jdbcType=INTEGER},
+            </if>
+        </set>
+        WHERE condition_id = #{record.conditionId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

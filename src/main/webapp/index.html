@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>欢迎访问</title>
+    <script src="js/jquery.min.js"></script>
+</head>
+<body>
+<div style="">
+    <h1>欢迎访问</h1>
+</div>
+<div style="margin: 0 auto;margin-top: 100px;">
+    <form action="fileUpload.do" method="post" enctype="multipart/form-data">
+        <p>
+            <span>文件1：</span>
+            <input type="file" name="imageFile1">
+        </p>
+        <p>
+            <span>文件2：</span>
+            <input type="file" name="imageFile2">
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+
+</div>
+<div style="display: none">
+    <button type="button" onclick="downLoad()" style="width: 50px; height: 30px">下载</button>
+    <br>
+    <button type="button" onclick="exportData()" style="width: 90px; height: 30px">excel导出</button>
+</div>
+<script type="text/javascript">
+    /**
+     * 获取项目根目录全路径
+     */
+    var appPath = getRootPath();
+    function getRootPath() {
+        var curWwwPath = window.document.location.href;
+        var pathName = window.document.location.pathname;
+        var pos = curWwwPath.indexOf(pathName);
+        var localhostPath = curWwwPath.substring(0, pos);
+        var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+        if (/hyperfit/.test(projectName)) {
+            return (localhostPath + projectName);
+        } else {
+            return (localhostPath);
+        }
+    }
+
+//    var allData = [];
+//    var obj = {};
+////    obj.actionId=1;
+//    obj.courseId="1";
+//    obj.actions='飞鸟';
+//    obj.times="8";
+//    obj.intervals="8";
+//    obj.remark='备注';
+//    allData.push(obj);
+//    var obj1 = {};
+////    obj1.actionId=1;
+//    obj1.courseId=1;
+//    obj1.actions='拉伸';
+//    obj1.times=8;
+//    obj1.intervals=8;
+//    obj1.remark='备注';
+//    allData.push(obj1);
+//    console.log(JSON.stringify(allData));
+//    $.post(appPath + '/course/editCourseInfo.do', {'courseId':1,'openid':'oCNMjwUUROW2vvTDmslLgl91TEbg','actions':JSON.stringify(allData)}, function(res) {
+//        if (res.code == 0) {
+//           alert("1");
+//        } else {
+//           alert("2");
+//        }
+//    });
+//    $.ajax({
+//        type: "post",
+//        url: appPath+"/course/editCourseInfo.do",
+//        dataType: 'json',
+//        async: true,
+//        success: function (data) {
+//            console.log(data.info);
+//            console.log(JSON.stringify(data));
+//        },
+//        error: function (xhr, text) {
+//            alert(text);
+//        }
+//    });
+    function downLoad() {
+        window.location.href = encodeURI(appPath + "/fileDownLoad.do?fileName=说明书.txt&filePath=/upload/txt/20170922/1506047786432ntyiq.txt");
+    }
+    function exportData() {
+        window.location.href = encodeURI(appPath + "/log/exportLog.do?logIds=1,2,3,4,5");
+    }
+</script>
+</body>
+</html>

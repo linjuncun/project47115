@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top"/>
+    <title>修改密码</title>
+    <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" type="text/css" href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/md5.js"></script>
+    <script type="text/javascript" src="../plugins/layer/layer.js"></script>
+</head>
+
+<body>
+<div class="col-md-4 col-md-offset-4">
+    <div class="login-box-plain">
+        <h2 class="bigintro">修 改 密 码</h2>
+        <form role="form" onsubmit="return false;">
+            <div class="form-group">
+                <div class="layui-form-item">
+                    <label for="oldPwd" class="layui-form-label">原密码</label>
+                    <div class="layui-input-block" style="margin-left: 4.33rem;">
+                        <i class="fa fa-lock input-i" style="margin: 0.8rem 0.13rem 0.26rem 0.66rem;"></i>
+                        <input type="password" class="layui-input" id="oldPwd" placeholder="请输入原密码">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="password" class="layui-form-label">新密码</label>
+                    <div class="layui-input-block" style="margin-left: 4.33rem;">
+                        <i class="fa fa-lock input-i" style="margin: 0.8rem 0.13rem 0.26rem 0.66rem;"></i>
+                        <input type="password" class="layui-input" id="password" placeholder="请输入新密码">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="password" class="layui-form-label">新密码</label>
+                    <div class="layui-input-block" style="margin-left: 4.33rem;">
+                        <i class="fa fa-lock input-i" style="margin: 0.8rem 0.13rem 0.26rem 0.66rem;"></i>
+                        <input type="password" class="layui-input" id="passwordChk" placeholder="请再次输入新密码">
+                    </div>
+                </div>
+            </div>
+            <div class="divide-20"></div>
+            <div class="form-actions">
+                <div class="layui-input-block" style="margin-left: 4.33rem;">
+                    <button type="button" class="btn btn-primary submitBtn">提交</button>
+                    <button type="button" class="btn btn-default" id="backBtn">取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="../js/pages/resetPwd.js"></script>
+</body>
+</html>

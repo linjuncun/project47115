@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top" />
+		<title>套餐详情</title>
+		<link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" type="text/css" href="../css/style.css">
+		<link href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+		<link href="../plugins/datatables/1.10.15/jquery.dataTables.css" rel="stylesheet"/>
+	</head>
+
+	<body>
+		<!-- HEADER -->
+		<header class="navbar clearfix" id="header">
+			<div class="container">
+				<div class="navbar-brand">
+					<img class="text-logo" src="../images/logo.png">
+					<span>Hyperfit 管理系统</span>
+				</div>
+				<ul class="nav navbar-nav pull-right">
+					<!-- BEGIN USER LOGIN DROPDOWN -->
+					<li class="dropdown pull-right">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<span class="username" id="navUser">个人信息管理</span>
+							<i class="fa fa-angle-down pull-down-icon"></i>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a id="resetPwd">修改密码</a>
+							</li>
+							<li>
+								<a id="logoutBtn">退出登录</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</header>
+		<!--/HEADER -->
+		<!-- PAGE -->
+		<section id="page">
+			<!-- SIDEBAR -->
+			<div id="sidebar" class="sidebar">
+				<div class="sidebar-menu nav-collapse">
+					<div class="menu-header">
+						<i class="fa fa-bars menu-icon"></i>
+					</div>
+					<!-- SIDEBAR MENU -->
+					<ul id="sideMenu" data-pageid='46'>
+					</ul>
+					<!-- /SIDEBAR MENU -->
+				</div>
+			</div>
+			<!-- /SIDEBAR -->
+			<div id="main-content">
+				<div id="content" class="col-lg-12">
+					<!-- PAGE HEADER-->
+					<div class="row">
+						<div class="col-sm-12 page-header">
+							<!-- BREADCRUMBS -->
+							<ul class="breadcrumb">
+								<li class="nav-font">
+									套餐管理
+								</li>
+								<li class="nav-font header-one">
+								</li>
+							</ul>
+							<!-- /BREADCRUMBS -->
+
+						</div>
+					</div>
+					<!-- /PAGE HEADER -->
+					<!-- SAMPLE -->
+					<div class="row row-padding">
+						<div style="border-bottom:1px solid #e6e6e6;margin-bottom: 1rem;">
+							<span class="margin-left-15" style="font-size: 1.33rem;" id="packageName"></span>
+							<p class="margin-left-15" >属于：<span class="margin-right-15 cardType"></span>卡类型：<span id="cardType" class="margin-right-15"></span>套餐办理数：<span id="cardNum"></span></p>
+						</div>
+						 <div class="col-md-12" style="margin-bottom: 1.66rem;display: inline-block;">
+		                    <div class="btn-group header-tab">
+		                        <button class="btn btn-item tab-button btn-item-checked" data-id="packageInfo" data-init="2">基本信息</button>
+		                        <button class="btn btn-item tab-button" data-id="cardTable" data-init="1">用户会员卡列表</button>
+		                    </div>
+		                </div>
+						<div class="col-md-12 box-body" id="packageInfo" >
+							<div class="layui-form-item" id="isReturnCash-div" >
+								<span class="span-title-long">是否为返现活动</span>
+								<span class="span-content" id="isReturnCash"></span>
+								<button type="button" class="btn btn-default" style="float: right;margin-top: -0.6rem;" id="editBtn">编辑</button>
+							</div>
+							<div class="layui-form-item hidden" id="condition-div">
+								<span class="span-title-long">返现条件及奖励</span>
+								<span class="span-content detail-content" id="returnCashCondition"></span>
+							</div>
+							<div class="layui-form-item">
+								<span class="span-title-long">适用门店范围</span>
+								<span class="span-content detail-content" id="supportGym"></span>
+							</div>
+							<div class="layui-form-item" >
+								<span class="span-title-long">适用课程范围</span>
+								<span class="span-content detail-content" id="supportCourse"></span>
+							</div>
+							<div class="layui-form-item" >
+								<span class="span-title-long">有效期</span>
+								<span class="span-content detail-content" id="indate"></span>
+							</div>
+							<div class="layui-form-item" >
+								<span class="span-title-long">注意事项</span>
+								<span class="span-content detail-content" id="notes"></span>
+							</div>
+						</div>
+						<div class="box-body hidden" id="cardTable">
+							<div>
+								<span class="condition-span">
+									<span class="">
+										<select id="status" class="conditions common-select calendar-condition">
+											<option value="">状态</option>
+											<option value="1">正常</option>
+											<option value="2">已封禁</option>
+										</select>
+									</span>
+								   <span class="">
+										<select id="balance" class="conditions common-select">
+											 <option value="">余额范围</option>
+											 <option value="-100"><100</option>
+											 <option value="100-200">100~200</option>
+											 <option value="200-300">200~300</option>
+											 <option value="300-400">300~400</option>
+											 <option value="400-500">400~500</option>
+											 <option value="500-600">500~600</option>
+											 <option value="600-700">600~700</option>
+											 <option value="700-800">700~800</option>
+											 <option value="800-900">800~900</option>
+											 <option value="900-1000">900~1000</option>
+											 <option value="1000-2000">1000~2000</option>
+											 <option value="2000-3000">2000~3000</option>
+											 <option value="3000-4000">3000~4000</option>
+											 <option value="4000-5000">4000~5000</option>
+											 <option value="5000-6000">5000~6000</option>
+											 <option value="6000-7000">6000~7000</option>
+											 <option value="7000-8000">7000~8000</option>
+											 <option value="8000-9000">8000~9000</option>
+											 <option value="9000-10000">9000~10000</option>
+											 <option value="10000-">>10000</option>
+										</select>
+									</span>
+									<span class="">
+										<input placeholder="到期时间" class="search input-date Wdate conditions" id="startDate"
+											   onchange="void(0);" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'endDate\')}'})">
+										&nbsp;至&nbsp;
+										<input placeholder="到期时间" class="search input-date Wdate conditions" id="endDate"
+											   onchange="void(0);" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'startDate\')}'})">
+									</span>
+								</span>
+								<button type="button" class="btn btn-default pull-right margin-right-15" id="addBtn">新增用户会员卡</button>
+							</div>
+							<div class="divide-20"></div>
+							<div>
+								<table id="table_id" class="display cell-border ">
+								</table>
+							</div>
+						</div>
+					<!-- /SAMPLE -->
+					</div>
+				</div>
+				<!-- /CONTENT-->
+			</div>
+		</section>
+		<!-- 弹窗 -->
+		<div id="alert-box">
+			<div class="divide-20">
+			</div>
+			<div class="col-md-12">
+				<div class="layui-form-item">
+					<label class="layui-form-label" style="text-align: right;width:7rem;">会员卡类型</label>
+					<div class="layui-input-block margin-left-80">
+						<span id="packageType" style="position: relative;top: 0.66rem;"></span>
+					</div>
+				</div>
+				<div class="layui-form-item addUser">
+					<label class="layui-form-label" style="text-align: right;width: 7rem;">绑定用户</label>
+					<div class="layui-input-block margin-left-80">
+						<input class="layui-input-small" id="addUser" placeholder="请输入手机号" type="number"  oninput="if(value.length>11)value=value.slice(0,11)" ><span
+							class="margin-left-15 addUserName"></span>
+						<input class="hidden" id="addUserId"/>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-input-block margin-left-80">
+						<span id="returnCash" class="hidden">
+							<input type="radio" class="checkbox-small" checked="checked" />
+							<span class="item-span">参加返现活动</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--/PAGE -->
+		<script src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../plugins/layer/layer.js"></script>
+		<script src="../plugins/datatables/1.10.15/jquery.dataTables.js"></script>
+		<script type="text/javascript" src="../plugins/My97DatePicker/WdatePicker.js"></script>
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/pages/packageDetail.js"></script>
+	</body>
+
+</html>

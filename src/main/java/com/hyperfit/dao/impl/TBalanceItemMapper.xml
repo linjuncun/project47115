@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TBalanceItemMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TBalanceItem">
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="item_type" jdbcType="INTEGER" property="itemType"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="condition_id" jdbcType="INTEGER" property="conditionId"/>
+        <result column="amount" jdbcType="INTEGER" property="amount"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <!--查询余额明细-->
+    <select id="getBalanceItem" parameterType="map" resultMap="BaseResultMap">
+        select tbi.*,trcc.days,trcc.money,trcc.times
+        from t_balance_item tbi
+        LEFT JOIN t_return_cash_condition trcc ON tbi.condition_id = trcc.condition_id
+        WHERE 1 = 1
+        <if test="userId != null and userId != '' ">
+            AND tbi.user_id = #{userId}
+        </if>
+    </select>
+
+    <insert id="insertSelective" parameterType="com.hyperfit.entity.TBalanceItem">
+        insert into t_balance_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="itemType != null">
+                item_type,
+            </if>
+            <if test="packageId != null">
+                package_id,
+            </if>
+            <if test="conditionId != null">
+                condition_id,
+            </if>
+            <if test="amount != null">
+                amount,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="itemType != null">
+                #{itemType,jdbcType=INTEGER},
+            </if>
+            <if test="packageId != null">
+                #{packageId,jdbcType=INTEGER},
+            </if>
+            <if test="conditionId != null">
+                #{conditionId,jdbcType=INTEGER},
+            </if>
+            <if test="amount != null">
+                #{amount,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

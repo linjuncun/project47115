@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SysFunctionMapper">
+  <resultMap id="BaseResultMap" type="com.hyperfit.entity.SysFunction">
+    <id column="function_id" jdbcType="INTEGER" property="functionId" />
+    <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="order_index" jdbcType="INTEGER" property="orderIndex" />
+  </resultMap>
+  <!-- 查询用户功能权限列表 -->
+  <select id="getUserFunctions" parameterType="map" resultMap="BaseResultMap">
+    SELECT sf.*
+    FROM sys_user_function suf
+    LEFT JOIN sys_function sf ON suf.function_id = sf.function_id
+    WHERE suf.sys_user_id = #{sysUserId}
+    <if test="functionId != null and functionId != '' ">
+      AND sf.parent_id = #{functionId}
+    </if>
+  </select>
+
+  <!-- 查询系统功能列表 -->
+  <select id="getSysFunctions" parameterType="map" resultMap="BaseResultMap">
+    SELECT sf.*
+    FROM sys_function sf
+    ORDER BY sf.order_index
+  </select>
+
+  <!-- 删除用户关联的权限 -->
+  <delete id="delSysUserFunctions" parameterType="map">
+    delete from sys_user_function
+    where sys_user_id = #{sysUserId}
+  </delete>
+  <!-- 关联用户权限 -->
+  <insert id="addSysUserFunctions" parameterType="java.util.List" useGeneratedKeys="true">
+    insert into sys_user_function
+    (sys_user_id, function_id)
+    values
+    <foreach collection="list" index="index" item="item" open=""
+             close="" separator=",">
+      (
+      #{item.sysUserId,jdbcType=INTEGER}, #{item.functionId,jdbcType=INTEGER}
+      )
+    </foreach>
+  </insert>
+
+
+</mapper>

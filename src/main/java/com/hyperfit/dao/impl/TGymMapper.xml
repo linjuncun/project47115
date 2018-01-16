@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TGymMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TGym">
+        <id column="gym_id" jdbcType="INTEGER" property="gymId"/>
+        <result column="sys_user_id" jdbcType="INTEGER" property="sysUserId"/>
+        <result column="gym_type" jdbcType="INTEGER" property="gymType"/>
+        <result column="gym_name" jdbcType="VARCHAR" property="gymName"/>
+        <result column="location_id" jdbcType="INTEGER" property="locationId"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="images" jdbcType="VARCHAR" property="images"/>
+        <result column="weight" jdbcType="INTEGER" property="weight"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="province" jdbcType="VARCHAR" property="province"/>
+        <result column="city" jdbcType="VARCHAR" property="city"/>
+        <result column="district" jdbcType="VARCHAR" property="district"/>
+        <result column="isMaxWeight" jdbcType="INTEGER" property="isMaxWeight"/>
+        <collection property="coachList" javaType="ArrayList" column="gymId=gym_id" ofType="Post"
+                    select="selectGymCoach"></collection>
+    </resultMap>
+    <!--查询健身房-->
+    <select id="getGym" parameterType="map" resultMap="BaseResultMap">
+        select tg.*,sl.district,sl.location_id districtId,slo.city,slo.location_id cityId,IF(slon.location_id=1,"",slon.province) province,slon.location_id provinceId,su.truename,
+               IF(tg.weight = (SELECT MAX(weight) FROM t_gym  WHERE STATUS = 1),1,0) isMaxWeight
+        from t_gym tg
+        LEFT JOIN sys_location sl ON tg.location_id = sl.location_id
+        LEFT JOIN sys_location slo ON sl.parent = slo.location_id
+        LEFT JOIN sys_location slon ON slo.parent = slon.location_id
+        LEFT JOIN sys_user su ON tg.sys_user_id = su.sys_user_id
+        where tg.status = 1
+        <if test="locationId != null and locationId != '' ">
+            AND (tg.location_id = #{locationId} OR slo.location_id = #{locationId})
+        </if>
+        <if test="gymType != null and gymType != '' ">
+            AND tg.gym_type = #{gymType}
+        </if>
+        <if test="gymName != null and gymName != '' ">
+            AND tg.gym_name = #{gymName}
+        </if>
+        <if test="gymId != null and gymId != '' ">
+            AND tg.gym_id = #{gymId}
+        </if>
+        <if test="provinceId != null and provinceId != '' ">
+            AND slon.location_id = #{provinceId}
+        </if>
+        <if test="cityId != null and cityId != '' ">
+            AND slo.location_id = #{cityId}
+        </if>
+        <if test="districtId != null and districtId != '' ">
+            AND sl.location_id = #{districtId}
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            AND (tg.gym_name LIKE concat('%',#{conditions},'%') OR su.truename LIKE concat('%',#{conditions},'%'))
+        </if>
+        <!-- 导出数据 -->
+        <if test="ids != null and ids != '' ">
+            AND tg.gym_id in
+            <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        ORDER BY tg.weight DESC ,convert(tg.gym_name using gbk)
+    </select>
+
+    <!-- 查询健身房教练列表 -->
+    <resultMap id="CoachMap" type="com.hyperfit.entity.TUser">
+        <id column="user_Id" jdbcType="INTEGER" property="userId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="sex" jdbcType="VARCHAR" property="sex"/>
+        <result column="headimgurl" jdbcType="VARCHAR" property="headimgurl"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="coach_type" jdbcType="INTEGER" property="coachType"/>
+        <result column="coach_label" jdbcType="VARCHAR" property="coachLabel"/>
+        <result column="weight" jdbcType="INTEGER" property="weight"/>
+    </resultMap>
+    <select id="selectGymCoach" parameterType="map" resultMap="CoachMap">
+        select tu.*
+        from t_user tu
+        LEFT JOIN t_gym_coach tgc ON tu.user_Id = tgc.user_Id
+        where tu.status != 3
+        AND tgc.gym_id = #{gymId}
+    </select>
+
+    <!-- 删除健身房教练 -->
+    <delete id="delGymCoaches" parameterType="map">
+        delete from t_gym_coach
+        where 1=1
+        <if test="gymId != null and gymId != '' ">
+            AND gym_id = #{gymId}
+        </if>
+        <if test="userId != null and userId != '' ">
+            AND user_Id = #{userId}
+        </if>
+    </delete>
+    <!-- 关联健身房教练 -->
+    <insert id="addGymCoaches" parameterType="java.util.List" useGeneratedKeys="true">
+        insert into t_gym_coach
+        (gym_id, user_id)
+        values
+        <foreach collection="list" index="index" item="item" open=""
+                 close="" separator=",">
+            (
+            #{item.gymId,jdbcType=INTEGER}, #{item.userId,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_gym
+        where gym_id = #{gymId,jdbcType=INTEGER}
+    </delete>
+    <!--添加健身房-->
+    <insert id="insertGym" parameterType="com.hyperfit.entity.TGym" useGeneratedKeys="true" keyProperty="gymId">
+        insert into t_gym
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="gymId != null">
+                gym_id,
+            </if>
+            <if test="gymType != null">
+                gym_type,
+            </if>
+            <if test="sysUserId != null">
+                sys_user_id,
+            </if>
+            <if test="gymName != null">
+                gym_name,
+            </if>
+            <if test="locationId != null">
+                location_id,
+            </if>
+            <if test="address != null">
+                address,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="images != null">
+                images,
+            </if>
+            <if test="weight != null">
+                weight,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="gymId != null">
+                #{gymId,jdbcType=INTEGER},
+            </if>
+            <if test="gymType != null">
+                #{gymType,jdbcType=INTEGER},
+            </if>
+            <if test="sysUserId != null">
+                #{sysUserId,jdbcType=INTEGER},
+            </if>
+            <if test="gymName != null">
+                #{gymName,jdbcType=VARCHAR},
+            </if>
+            <if test="locationId != null">
+                #{locationId,jdbcType=INTEGER},
+            </if>
+            <if test="address != null">
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="images != null">
+                #{images,jdbcType=VARCHAR},
+            </if>
+            <if test="weight != null">
+                #{weight,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--更新健身房信息-->
+    <update id="updateGym" parameterType="map">
+        update t_gym
+        <set>
+            <if test="record.gymId != null">
+                gym_id = #{record.gymId,jdbcType=INTEGER},
+            </if>
+            <if test="record.gymType != null">
+                gym_type = #{record.gymType,jdbcType=INTEGER},
+            </if>
+            <if test="record.sysUserId != null">
+                sys_user_id = #{record.sysUserId,jdbcType=INTEGER},
+            </if>
+            <if test="record.gymName != null">
+                gym_name = #{record.gymName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.locationId != null">
+                location_id = #{record.locationId,jdbcType=INTEGER},
+            </if>
+            <if test="record.address != null">
+                address = #{record.address,jdbcType=VARCHAR},
+            </if>
+            <if test="record.intro != null">
+                intro = #{record.intro,jdbcType=VARCHAR},
+            </if>
+            <if test="record.images != null">
+                images = #{record.images,jdbcType=VARCHAR},
+            </if>
+            <if test="record.weight != null">
+                weight = #{record.weight,jdbcType=INTEGER},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE gym_id = #{record.gymId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

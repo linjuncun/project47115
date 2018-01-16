@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TCourseMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TCourse">
+        <id column="course_id" jdbcType="INTEGER" property="courseId"/>
+        <result column="course_name" jdbcType="VARCHAR" property="courseName"/>
+        <result column="course_type" jdbcType="INTEGER" property="courseType"/>
+        <result column="template_id" jdbcType="INTEGER" property="templateId"/>
+        <result column="gym_id" jdbcType="INTEGER" property="gymId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="class_hour" jdbcType="TIMESTAMP" property="classHour"/>
+        <result column="price" jdbcType="INTEGER" property="price"/>
+        <result column="course_label" jdbcType="VARCHAR" property="courseLabel"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="notes" jdbcType="VARCHAR" property="notes"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="minutes" jdbcType="INTEGER" property="minutes"/>
+        <result column="min_num" jdbcType="INTEGER" property="minNum"/>
+        <result column="max_num" jdbcType="INTEGER" property="maxNum"/>
+        <result column="template_name" jdbcType="VARCHAR" property="templateName"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="headimgurl" jdbcType="VARCHAR" property="headimgurl"/>
+        <result column="orderNum" jdbcType="INTEGER" property="orderNum"/>
+        <result column="images" jdbcType="VARCHAR" property="images"/>
+        <result column="coachIntro" jdbcType="VARCHAR" property="coachIntro"/>
+        <result column="coach_label" jdbcType="VARCHAR" property="coachLabel"/>
+        <result column="isOrder" jdbcType="INTEGER" property="isOrder"/>
+        <result column="order_id" jdbcType="INTEGER" property="orderId"/>
+        <result column="gym_name" jdbcType="VARCHAR" property="gymName"/>
+        <result column="long_goal" jdbcType="VARCHAR" property="longGoal"/>
+        <result column="short_goal" jdbcType="VARCHAR" property="shortGoal"/>
+        <result column="task" jdbcType="VARCHAR" property="task"/>
+        <result column="summary" jdbcType="VARCHAR" property="summary"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="sale_status" jdbcType="INTEGER" property="saleStatus"/>
+        <result column="max_people" jdbcType="INTEGER" property="maxPeople"/>
+        <result column="solgan" jdbcType="VARCHAR" property="solgan"/>
+        <result column="gym_ids" jdbcType="VARCHAR" property="gymIds"/>
+        <result column="imgs" jdbcType="VARCHAR" property="imgs"/>
+        <collection property="supportGym" javaType="ArrayList" column="gymIds=gym_ids" ofType="Post"
+                    select="selectSupportGym"></collection>
+    </resultMap>
+    <!--查询课程-->
+    <select id="getCourse" parameterType="map" resultMap="BaseResultMap">
+        select tc.*,
+        tt.course_type,tt.minutes,tt.min_num,tt.max_num,tt.images,tt.template_name,
+        tu.name,tu.headimgurl,tu.intro coachIntro,tu.openid,tu.coach_label,tg.gym_name,
+        if(DATE_SUB(tc.class_hour,INTERVAL sc.off_order_time HOUR) > now(),0,1) stopOrder,
+        (SELECT COUNT(tor.order_id) FROM t_order tor WHERE tor.order_type = 1 AND tor.course_id = tc.course_id AND
+        tor.status = 3) orderNum
+        <if test="queryUserId != null and queryUserId != '' ">
+            ,(SELECT COUNT(1) FROM t_order WHERE status IN(2,3) AND user_id=#{queryUserId} AND course_id = tc.course_id)
+            isOrder
+        </if>
+        from t_course tc
+        LEFT JOIN t_template tt ON tc.template_id = tt.template_id
+        LEFT JOIN t_user tu ON tc.user_id = tu.user_id
+        LEFT JOIN t_gym tg ON tc.gym_id = tg.gym_id
+        LEFT JOIN sys_config sc ON 1=1
+        where tc.status != 3
+        <if test="queryDate != null and queryDate != '' ">
+            AND DATE(tc.class_hour) = DATE(#{queryDate})
+        </if>
+        <if test="gymId != null and gymId != '' ">
+            AND tc.gym_id = #{gymId}
+        </if>
+        <if test="courseType != null and courseType != '' ">
+            AND tt.course_type = #{courseType}
+        </if>
+        <if test="status != null and status != '' ">
+            AND tc.status = #{status}
+        </if>
+        <if test="courseId != null and courseId != '' ">
+            AND tc.course_id = #{courseId}
+        </if>
+        <if test="userId != null and userId != '' ">
+            AND tc.user_id = #{userId}
+        </if>
+        <if test="templateId != null and templateId != '' ">
+            AND tt.template_id = #{templateId}
+        </if>
+        <if test="type != null and type != '' ">
+            AND tc.type = #{type}
+        </if>
+        <if test="saleStatus != null and saleStatus != '' ">
+            AND tc.sale_status = #{saleStatus}
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            AND tc.course_name LIKE concat('%',#{conditions},'%')
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tc.class_hour) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tc.class_hour)
+        </if>
+        <!--查询已开始预约的课程-->
+        <if test='queryType == "1" '>
+            AND now() > DATE_ADD(tc.create_time,INTERVAL sc.on_order_time HOUR)
+        </if>
+        <!--查询正在进行的活动-->
+        <if test='queryType == "2" '>
+            AND tc.class_hour > now()
+        </if>
+        <!--查询已完成活动-->
+        <if test='queryType == "3" '>
+            AND now() > tc.class_hour
+        </if>
+        <!--查询截止预约且未上课的课程-->
+        <if test='queryType == "4" '>
+            AND (now() >= DATE_SUB(tc.class_hour,INTERVAL sc.off_order_time HOUR) AND tc.class_hour > now())
+        </if>
+        <!--查询未开课的课程-->
+        <if test='queryStatus == "1" '>
+            AND ( tc.status = 1 AND tc.class_hour > now())
+        </if>
+        <!--查询开课中的课程-->
+        <if test='queryStatus == "2" '>
+            AND ( tc.status = 1 AND now() > tc.class_hour AND DATE_ADD(tc.class_hour,INTERVAL tt.minutes MINUTE ) >
+            now())
+        </if>
+        <!--查询已关闭的课程-->
+        <if test='queryStatus == "3" '>
+            AND tc.status = 2
+        </if>
+        <!--查询已完结的课程-->
+        <if test='queryStatus == "4" '>
+            AND ( tc.status = 1 AND now() > DATE_ADD(tc.class_hour,INTERVAL tt.minutes MINUTE ))
+        </if>
+        <!-- 导出数据 -->
+        <if test="ids != null and ids != '' ">
+            AND tc.course_id in
+            <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test='orderType == "1" '>
+            ORDER BY tc.class_hour
+        </if>
+        <if test='orderType == "2" '>
+            ORDER BY tc.class_hour DESC,convert(tc.course_name using gbk)
+        </if>
+    </select>
+
+    <!--查询参与活动的门店-->
+    <select id="selectSupportGym" parameterType="map" resultType="map">
+        select tg.gym_id gymId,tg.gym_name gymName
+        from t_gym tg
+        where tg.gym_id in (${gymIds})
+    </select>
+
+    <!--查询用户课程列表-->
+    <select id="getUserCourse" parameterType="map" resultMap="BaseResultMap">
+        SELECT tor.order_id,tor.amount,tor.status
+        orderStatus,tc.course_id,tc.course_name,tc.course_label,tc.class_hour,tc.user_id,tc.gym_ids,tc.status,
+        tt.minutes,tu.name,tu.headimgurl,tg.gym_name,tu.status userStatus
+        FROM t_order tor
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        LEFT JOIN t_template tt ON tc.template_id = tt.template_id
+        LEFT JOIN t_user tu ON tc.user_id = tu.user_id
+        LEFT JOIN t_gym tg ON tc.gym_id = tg.gym_id
+        where 1 = 1
+        <if test="orderType != null and orderType != '' ">
+            AND tor.order_type IN (${orderType})
+        </if>
+        <if test="userId != null and userId != '' ">
+            AND tor.user_id = #{userId}
+        </if>
+        <if test="coachId != null and coachId != '' ">
+            AND tc.user_id = #{coachId}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tc.class_hour) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tc.class_hour)
+        </if>
+        <if test="gymId != null and gymId != '' ">
+            AND tc.gym_id = #{gymId}
+        </if>
+        <if test="courseType != null and courseType != '' ">
+            AND tt.course_type = #{courseType}
+        </if>
+        <if test="status != null and status != '' ">
+            AND tor.status IN (${status})
+        </if>
+        <!--queryType 查询类型 1：未上课  2：已上课  3：已退课 4:已预约（包含未上和已上课）-->
+        <if test='queryType == "1" '>
+            AND (tc.class_hour > now() AND tor.status = 3 )
+        </if>
+        <if test='queryType == "2" '>
+            AND (now() > tc.class_hour AND tor.status = 3 )
+        </if>
+        <if test='queryType == "3" '>
+            AND tor.status = 5
+        </if>
+        <if test='queryType == "4" '>
+            AND tor.status = 3
+        </if>
+        ORDER BY tc.class_hour DESC,convert(tc.course_name using gbk)
+    </select>
+
+    <!-- 查询不重复课程（同一种课程只展示一条数据，不按上课时间都展示出来）-->
+    <select id="getCourseNoRepeat" parameterType="map" resultMap="BaseResultMap">
+        SELECT tc.course_name,tc.course_id,tc.gym_ids
+        FROM t_course tc
+        WHERE tc.status != 3
+        AND tc.type = 1
+        <if test="gymIds != null and gymIds != '' ">
+            AND tc.gym_id IN (${gymIds})
+        </if>
+        <if test="status != null and status != '' ">
+            AND tc.status = #{status}
+        </if>
+        GROUP BY tc.course_name
+    </select>
+
+    <!--新增课程-->
+    <insert id="insertCourse" parameterType="com.hyperfit.entity.TCourse">
+        insert into t_course
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">
+                course_id,
+            </if>
+            <if test="courseName != null">
+                course_name,
+            </if>
+            <if test="templateId != null">
+                template_id,
+            </if>
+            <if test="gymId != null">
+                gym_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="classHour != null">
+                class_hour,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="courseLabel != null">
+                course_label,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="notes != null">
+                notes,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="maxPeople != null">
+                max_people,
+            </if>
+            <if test="solgan != null">
+                solgan,
+            </if>
+            <if test="gymIds != null">
+                gym_ids,
+            </if>
+            <if test="imgs != null">
+                imgs,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">
+                #{courseId,jdbcType=INTEGER},
+            </if>
+            <if test="courseName != null">
+                #{courseName,jdbcType=VARCHAR},
+            </if>
+            <if test="templateId != null">
+                #{templateId,jdbcType=INTEGER},
+            </if>
+            <if test="gymId != null">
+                #{gymId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="classHour != null">
+                #{classHour,jdbcType=TIMESTAMP},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=INTEGER},
+            </if>
+            <if test="courseLabel != null">
+                #{courseLabel,jdbcType=VARCHAR},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="notes != null">
+                #{notes,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="maxPeople != null">
+                #{maxPeople,jdbcType=INTEGER},
+            </if>
+            <if test="solgan != null">
+                #{solgan,jdbcType=VARCHAR},
+            </if>
+            <if test="gymIds != null">
+                #{gymIds,jdbcType=VARCHAR},
+            </if>
+            <if test="imgs != null">
+                #{imgs,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <!--修改课程-->
+    <update id="updateCourse" parameterType="map">
+        update t_course
+        <set>
+            <if test="record.courseId != null">
+                course_id = #{record.courseId,jdbcType=INTEGER},
+            </if>
+            <if test="record.courseName != null">
+                course_name = #{record.courseName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.templateId != null">
+                template_id = #{record.templateId,jdbcType=INTEGER},
+            </if>
+            <if test="record.gymId != null">
+                gym_id = #{record.gymId,jdbcType=INTEGER},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=INTEGER},
+            </if>
+            <if test="record.classHour != null">
+                class_hour = #{record.classHour,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.price != null">
+                price = #{record.price,jdbcType=INTEGER},
+            </if>
+            <if test="record.courseLabel != null">
+                course_label = #{record.courseLabel,jdbcType=VARCHAR},
+            </if>
+            <if test="record.intro != null">
+                intro = #{record.intro,jdbcType=VARCHAR},
+            </if>
+            <if test="record.notes != null">
+                notes = #{record.notes,jdbcType=VARCHAR},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.longGoal != null">
+                long_goal = #{record.longGoal,jdbcType=VARCHAR},
+            </if>
+            <if test="record.shortGoal != null">
+                short_goal = #{record.shortGoal,jdbcType=VARCHAR},
+            </if>
+            <if test="record.task != null">
+                task = #{record.task,jdbcType=VARCHAR},
+            </if>
+            <if test="record.summary != null">
+                summary = #{record.summary,jdbcType=VARCHAR},
+            </if>
+            <if test="record.type != null">
+                type = #{record.type,jdbcType=INTEGER},
+            </if>
+            <if test="record.saleStatus != null">
+                sale_status = #{record.saleStatus,jdbcType=INTEGER},
+            </if>
+            <if test="record.maxPeople != null">
+                max_people = #{record.maxPeople,jdbcType=INTEGER},
+            </if>
+            <if test="record.solgan != null">
+                solgan = #{record.solgan,jdbcType=VARCHAR},
+            </if>
+            <if test="record.gymIds != null">
+                gym_ids = #{record.gymIds,jdbcType=VARCHAR},
+            </if>
+            <if test="record.imgs != null">
+                imgs = #{record.imgs,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE 1 = 1
+        <if test="record.courseId != null">
+            AND course_id = #{record.courseId,jdbcType=INTEGER}
+        </if>
+    </update>
+
+</mapper>

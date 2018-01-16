@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SysUserMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.SysUser">
+        <id column="sys_user_id" jdbcType="INTEGER" property="sysUserId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="truename" jdbcType="VARCHAR" property="truename"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+    </resultMap>
+    <!--查询系统用户-->
+    <select id="getSysUser" parameterType="map" resultMap="BaseResultMap">
+        select su.*
+        from sys_user su
+        where 1 = 1
+        <if test="username != null and username != '' ">
+            AND su.username = #{username}
+        </if>
+        <if test="truename != null and truename != '' ">
+            AND su.truename = #{truename}
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            AND (su.truename LIKE concat('%',#{conditions},'%') OR su.username LIKE concat('%',#{conditions},'%'))
+        </if>
+        <if test="sysUserId != null and sysUserId != '' ">
+            AND su.sys_user_id = #{sysUserId}
+        </if>
+        <if test="status != null and status != '' ">
+            AND su.status IN (${status})
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from sys_user
+        where sys_user_id = #{sysUserId,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertSysUser" parameterType="com.hyperfit.entity.SysUser">
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sysUserId != null">
+                sys_user_id,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="truename != null">
+                truename,
+            </if>
+            <if test="password != null">
+                password,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="lastLoginTime != null">
+                last_login_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sysUserId != null">
+                #{sysUserId,jdbcType=INTEGER},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="truename != null">
+                #{truename,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastLoginTime != null">
+                #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--更新系统用户信息-->
+    <update id="updateSysUser" parameterType="map">
+        update sys_user
+        <set>
+            <if test="record.sysUserId != null">
+                sys_user_id = #{record.sysUserId,jdbcType=INTEGER},
+            </if>
+            <if test="record.username != null">
+                username = #{record.username,jdbcType=VARCHAR},
+            </if>
+            <if test="record.truename != null">
+                truename = #{record.truename,jdbcType=VARCHAR},
+            </if>
+            <if test="record.password != null">
+                password = #{record.password,jdbcType=VARCHAR},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.lastLoginTime != null">
+                last_login_time = #{record.lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE sys_user_id = #{record.sysUserId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

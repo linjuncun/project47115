@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="debug">
+    <!-- 定义全局变量 -->
+    <properties>
+        <property name="LOG_HOME">/logs</property>
+        <property name="FILE_NAME">hyperfit</property>
+    </properties>
+
+    <!--     先定义所有的appender -->
+    <appenders>
+        <!--         这个输出控制台的配置 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--             控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch） -->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--             输出日志的格式 -->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </Console>
+
+        <!--         append为TRUE表示消息增加到指定文件中，false表示消息覆盖指定的文件内容(每次运行程序会先清空之前的记录)，默认值是true -->
+        <File name="console-log" fileName="${LOG_HOME}/console.log" append="false">
+       	    <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </File>
+
+        <!--          添加过滤器ThresholdFilter,可以有选择的输出某个级别以上的类别  onMatch="ACCEPT" onMismatch="DENY"意思是匹配就接受,否则直接拒绝  -->
+        <File name="ERROR" fileName="${LOG_HOME}/error/error.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </File>
+
+        <RollingRandomAccessFile name="RollingFile"
+                                 immediateFlush="true" fileName="${LOG_HOME}/month/${FILE_NAME}.log"
+                                 filePattern="${LOG_HOME}/${FILE_NAME}.log.%d{yyyy-MM-dd}-%i">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，注意filePattern中配置的文件重命名规则是${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i，
+                最小的时间粒度是mm，即分钟，TimeBasedTriggeringPolicy指定的size是1，结合起来就是每1分钟生成一个新文件。如果改成%d{yyyy-MM-dd HH}，
+                最小粒度为小时，则每一个小时生成一个文件。-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
+
+    </appenders>
+
+    <!--     然后定义logger，只有定义了logger并引入的appender，appender才会生效 -->
+    <loggers>
+        <!--         建立一个默认的root的logger -->
+        <root level="debug">
+            <appender-ref ref="RollingFile"/>
+            <appender-ref ref="Console"/>
+            <appender-ref ref="ERROR"/>
+            <appender-ref ref="console-log"/>
+        </root>
+
+        <logger name="org.springframework" level="error" additivity="false">
+            <AppenderRef ref="Console" />
+        </logger>
+
+
+    </loggers>
+</configuration>

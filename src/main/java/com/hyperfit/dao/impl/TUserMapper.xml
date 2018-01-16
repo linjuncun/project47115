@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TUserMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TUser">
+        <id column="user_Id" jdbcType="INTEGER" property="userId"/>
+        <result column="user_type" jdbcType="INTEGER" property="userType"/>
+        <result column="openid" jdbcType="VARCHAR" property="openid"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="sex" jdbcType="VARCHAR" property="sex"/>
+        <result column="headimgurl" jdbcType="VARCHAR" property="headimgurl"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="coach_images" jdbcType="VARCHAR" property="coachImages"/>
+        <result column="coach_type" jdbcType="INTEGER" property="coachType"/>
+        <result column="coach_label" jdbcType="VARCHAR" property="coachLabel"/>
+        <result column="weight" jdbcType="INTEGER" property="weight"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="balance" jdbcType="INTEGER" property="balance"/>
+        <collection property="gymList" javaType="ArrayList" column="userId=user_Id" ofType="Post"
+                    select="selectCoachGym"></collection>
+        <collection property="cardList" javaType="ArrayList" column="userId=user_Id" ofType="Post"
+                    select="selectUserCards"></collection>
+    </resultMap>
+    <!-- 查询用户信息 -->
+    <select id="getUserInfo" parameterType="map" resultMap="BaseResultMap">
+        select
+        <if test="cardType != null and cardType != '' ">
+            DISTINCT
+        </if>
+        tu.*
+        from t_user tu
+        <if test="cardType != null and cardType != '' ">
+            LEFT JOIN t_club_card tca ON tu.user_Id = tca.user_id OR tu.user_Id = tca.vice_user_id
+            LEFT JOIN t_package tp ON tca.package_id = tp.package_id
+        </if>
+        where tu.status != 3
+        <if test="userId != null and userId != '' ">
+            and tu.user_id = #{userId,jdbcType=BIGINT}
+        </if>
+        <if test="openid != null and openid != '' ">
+            and tu.openid = #{openid,jdbcType=VARCHAR}
+        </if>
+        <if test="userType != null and userType != '' ">
+            and tu.user_type = #{userType}
+        </if>
+        <if test="status != null and status != '' ">
+            and tu.status = #{status}
+        </if>
+        <if test="coachType != null and coachType != '' ">
+            and tu.coach_type = #{coachType}
+        </if>
+        <if test="sex != null and sex != '' ">
+            and tu.sex = #{sex}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tu.create_time) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tu.create_time)
+        </if>
+        <if test="name != null and name != '' ">
+            and tu.name like concat('%', #{nickname}, '%')
+        </if>
+        <if test="phone != null and phone != '' ">
+            and tu.phone like concat('%', #{phone}, '%')
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            and (tu.name like concat('%', #{conditions}, '%') OR tu.phone like concat('%', #{conditions}, '%') )
+        </if>
+        <!-- 查询门店下教练 -->
+        <if test="gymId != null and gymId != '' ">
+            and tu.user_id IN (SELECT tgc.user_id FROM t_gym_coach tgc WHERE tgc.gym_id = #{gymId})
+        </if>
+        <if test="cardType != null and cardType != '' ">
+            and tp.card_type = #{cardType}
+        </if>
+        <!-- 导出数据 -->
+        <if test="ids != null and ids != '' ">
+            AND tu.user_id in
+            <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        ORDER BY tu.weight DESC ,convert(tu.name using gbk)
+    </select>
+    <!-- 查询教练所属健身房 -->
+    <resultMap id="GymMap" type="com.hyperfit.entity.TGym">
+        <id column="gym_id" jdbcType="INTEGER" property="gymId"/>
+        <result column="gym_type" jdbcType="INTEGER" property="gymType"/>
+        <result column="gym_name" jdbcType="VARCHAR" property="gymName"/>
+    </resultMap>
+    <select id="selectCoachGym" parameterType="map" resultMap="GymMap">
+        select tg.*
+        from t_gym tg
+        LEFT JOIN t_gym_coach tgc ON tg.gym_id = tgc.gym_id
+        where tg.status = 1
+        AND tgc.user_id = #{userId}
+    </select>
+    <!--查询用户会员卡列表-->
+    <resultMap id="CardMap" type="com.hyperfit.entity.TClubCard">
+        <id column="card_id" jdbcType="INTEGER" property="cardId"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="card_type" jdbcType="INTEGER" property="cardType"/>
+    </resultMap>
+    <select id="selectUserCards" parameterType="map" resultMap="CardMap">
+        select tcc.card_id,tcc.package_id,tp.card_type,
+        concat(tp.card_type,LEFT('0000000000',(9-LENGTH(tcc.card_id))) , tcc.card_id) cardNo
+        from t_club_card tcc
+        LEFT JOIN t_package tp ON tcc.package_id = tp.package_id
+        where (tcc.user_id = #{userId} OR tcc.vice_user_id = #{userId})
+        <!--查询未过期 AND DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY) >= now()-->
+    </select>
+
+
+    <!--查询课程的预约用户-->
+    <select id="getCourseUser" parameterType="map" resultMap="BaseResultMap">
+        SELECT tu.*,tor.order_id orderId,tor.status orderStatus,tor.pay_type payType,tor.create_time orderTime,
+                tor.course_id courseId,tp.card_type cardType,if(tc.class_hour > now(),0,1) isStart
+        FROM t_order tor
+        LEFT JOIN t_user tu ON tor.user_id = tu.user_id
+        LEFT JOIN t_club_card tcc ON tor.card_id = tcc.card_id
+        LEFT JOIN t_package tp ON tcc.package_id = tp.package_id
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        WHERE tor.course_id = #{courseId}
+        <if test="status != null and status != '' ">
+            AND tor.status in (${status})
+        </if>
+        ORDER BY tor.create_time DESC
+    </select>
+    <!--删除用户-->
+    <delete id="delUser" parameterType="map">
+        delete from t_user
+        where user_Id = #{userId,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertUser" parameterType="com.hyperfit.entity.TUser" useGeneratedKeys="true" keyProperty="userId">
+        insert into t_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_Id,
+            </if>
+            <if test="userType != null">
+                user_type,
+            </if>
+            <if test="openid != null">
+                openid,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="sex != null">
+                sex,
+            </if>
+            <if test="headimgurl != null">
+                headimgurl,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="coachImages != null">
+                coach_images,
+            </if>
+            <if test="coachType != null">
+                coach_type,
+            </if>
+            <if test="weight != null">
+                weight,
+            </if>
+            <if test="coachLabel != null">
+                coach_label,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="userType != null">
+                #{userType,jdbcType=INTEGER},
+            </if>
+            <if test="openid != null">
+                #{openid,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                #{sex,jdbcType=VARCHAR},
+            </if>
+            <if test="headimgurl != null">
+                #{headimgurl,jdbcType=VARCHAR},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="coachImages != null">
+                #{coachImages,jdbcType=VARCHAR},
+            </if>
+            <if test="coachType != null">
+                #{coachType,jdbcType=INTEGER},
+            </if>
+            <if test="weight != null">
+                #{weight,jdbcType=INTEGER},
+            </if>
+            <if test="coachLabel != null">
+                #{coachLabel,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!-- 修改用户 -->
+    <update id="updateUserInfo" parameterType="map">
+        update t_user
+        <set>
+            <if test="record.userId != null">
+                user_Id = #{record.userId,jdbcType=INTEGER},
+            </if>
+            <if test="record.openid != null">
+                openid = #{record.openid,jdbcType=VARCHAR},
+            </if>
+            <if test="record.userType != null">
+                user_type = #{record.userType,jdbcType=INTEGER},
+            </if>
+            <if test="record.name != null">
+                name = #{record.name,jdbcType=VARCHAR},
+            </if>
+            <if test="record.phone != null">
+                phone = #{record.phone,jdbcType=VARCHAR},
+            </if>
+            <if test="record.sex != null">
+                sex = #{record.sex,jdbcType=VARCHAR},
+            </if>
+            <if test="record.headimgurl != null">
+                headimgurl = #{record.headimgurl,jdbcType=VARCHAR},
+            </if>
+            <if test="record.intro != null">
+                intro = #{record.intro,jdbcType=VARCHAR},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.coachImages != null">
+                coach_images = #{record.coachImages,jdbcType=VARCHAR},
+            </if>
+            <if test="record.coachType != null">
+                coach_type = #{record.coachType,jdbcType=INTEGER},
+            </if>
+            <if test="record.weight != null">
+                weight = #{record.weight,jdbcType=INTEGER},
+            </if>
+            <if test="record.coachLabel != null">
+                coach_label = #{record.coachLabel,jdbcType=VARCHAR},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.balance != null">
+                balance = balance + #{record.balance,jdbcType=INTEGER},
+            </if>
+        </set>
+        WHERE user_Id = #{record.userId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

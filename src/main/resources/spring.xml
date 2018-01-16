@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 引入配置文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 启用spring注解支持 -->
+    <context:annotation-config/>
+    <context:component-scan base-package="com.hyperfit.service"/>
+    <context:component-scan base-package="com.hyperfit.dao"/>
+    <context:component-scan base-package="com.hyperfit.util.wechat"/>
+
+    <!-- shiro -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login.html"/>
+        <property name="unauthorizedUrl" value="/login.html"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /pages/** = authc
+            </value>
+        </property>
+    </bean>
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+    </bean>
+    <bean id="myRealm" class="com.hyperfit.util.MyRealm"/>
+
+    <!-- 配置文件bean -->
+    <bean id="configProperties"
+          class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath*:project.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 定时器 -->
+    <!-- 工作类 -->
+    <bean id="jsapiTask" class="com.hyperfit.util.wechat.JsapiTicketTimeTask"/>
+    <bean id="checkTask" class="com.hyperfit.controller.QuartzController" />
+    <!-- 任务 -->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="jsapiTask"/>
+        <property name="targetMethod" value="getTicket"/>
+        <property name="concurrent" value="false"/>
+    </bean>
+    <bean id="jobDetailA" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="checkTask" />
+        <property name="targetMethod" value="doCheck" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <bean id="jobDetailB" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="checkTask" />
+        <property name="targetMethod" value="doCardCheck" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <!-- 触发器 -->
+    <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail"/>
+        <property name="startDelay" value="1000"/>
+        <property name="repeatInterval" value="3600000"/>
+    </bean>
+    <bean id="simpleTriggerA"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetailA" />
+        <property name="startDelay" value="1000" />
+        <property name="repeatInterval" value="1800000" />
+    </bean>
+    <bean id="simpleTriggerB"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetailB" />
+        <property name="startDelay" value="1000" />
+        <property name="repeatInterval" value="3600000" />
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <!-- 触发器列表    -->
+                <ref bean="simpleTrigger"/>
+                <ref bean="simpleTriggerA" />
+                <ref bean="simpleTriggerB" />
+            </list>
+        </property>
+    </bean>
+</beans>

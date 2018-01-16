@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="唐国峰 gaowangyizu@163.com http://fengwork.top"/>
+    <title>模版详情</title>
+    <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link href="../plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+
+<body>
+<!-- HEADER -->
+<header class="navbar clearfix" id="header">
+    <div class="container">
+        <div class="navbar-brand">
+            <img class="text-logo" src="../images/logo.png">
+            <span>Hyperfit 管理系统</span>
+        </div>
+        <ul class="nav navbar-nav pull-right">
+            <!-- BEGIN USER LOGIN DROPDOWN -->
+            <li class="dropdown pull-right">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="username" id="navUser">个人信息管理</span>
+                    <i class="fa fa-angle-down pull-down-icon"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a id="resetPwd">修改密码</a>
+                    </li>
+                    <li>
+                        <a id="logoutBtn">退出登录</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</header>
+<!--/HEADER -->
+<!-- PAGE -->
+<section id="page">
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-menu nav-collapse">
+            <div class="menu-header">
+                <i class="fa fa-bars menu-icon"></i>
+            </div>
+            <!-- SIDEBAR MENU -->
+            <ul id="sideMenu" data-pageid='13'>
+            </ul>
+            <!-- /SIDEBAR MENU -->
+        </div>
+    </div>
+    <!-- /SIDEBAR -->
+    <div id="main-content">
+        <div id="content" class="col-lg-12">
+            <!-- PAGE HEADER-->
+            <div class="row">
+                <div class="col-sm-12 page-header">
+                    <!-- BREADCRUMBS -->
+                    <ul class="breadcrumb">
+                        <li class="nav-font">
+                            课程管理
+                        </li>
+                        <li class="nav-font header-one">
+                        </li>
+                        <li class="nav-font header-two"></li>
+                    </ul>
+                    <!-- /BREADCRUMBS -->
+
+                </div>
+            </div>
+            <!-- /PAGE HEADER -->
+            <!-- SAMPLE -->
+            <div class="row row-padding">
+                <div style="border-bottom:1px solid #e6e6e6;margin-bottom: 1rem;">
+                    <span class="margin-left-15" style="font-size: 1.33rem;" id="templateName"></span>
+                    <p class="margin-left-15">时长：<span id="minutes" class="margin-right-15"></span>最少开课人数：<span
+                            id="minNum" class="margin-right-15"></span>上课人数上限：<span id="maxNum"></span></p>
+                </div>
+
+                <div class="layui-form-item">
+                    <span class="span-title">文字介绍</span>
+                    <span class="span-content detail-content-small" id="intro"></span>
+                    <button type="button" class="btn btn-default" style="float: right;margin-right: 1.66rem;" id="editBtn">编辑</button>
+                    <div class="divide-20"></div>
+                </div>
+                <div class="layui-form-item">
+                    <span class="span-title">注意事项</span>
+                    <span class="span-content detail-content-small" id="notes"></span>
+                    <div class="divide-20"></div>
+                </div>
+                <div class="layui-form-item">
+                    <span class="span-title">图片</span>
+                    <span class="span-content detail-content" id="images">
+								</span>
+                </div>
+                <div class="divide-20"></div>
+            </div>
+            <!-- /SAMPLE -->
+        </div>
+        <!-- /CONTENT-->
+    </div>
+</section>
+
+<!--/PAGE -->
+<script src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../plugins/layer/layer.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript" src="../js/pages/templateDetail.js"></script>
+</body>
+
+</html>

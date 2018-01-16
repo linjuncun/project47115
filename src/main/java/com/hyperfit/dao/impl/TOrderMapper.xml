@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TOrderMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TOrder">
+        <id column="order_id" jdbcType="INTEGER" property="orderId"/>
+        <result column="order_type" jdbcType="INTEGER" property="orderType"/>
+        <result column="openid" jdbcType="VARCHAR" property="openid"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="course_id" jdbcType="INTEGER" property="courseId"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="amount" jdbcType="INTEGER" property="amount"/>
+        <result column="user_coupon_id" jdbcType="INTEGER" property="userCouponId"/>
+        <result column="pay_type" jdbcType="INTEGER" property="payType"/>
+        <result column="card_id" jdbcType="INTEGER" property="cardId"/>
+        <result column="card_type" jdbcType="INTEGER" property="cardType"/>
+        <result column="sys_user_id" jdbcType="INTEGER" property="sysUserId"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="apply_no" jdbcType="VARCHAR" property="applyNo"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="course_name" jdbcType="VARCHAR" property="courseName"/>
+        <result column="gym_id" jdbcType="INTEGER" property="gymId"/>
+        <result column="coupon_name" jdbcType="VARCHAR" property="couponName"/>
+        <result column="coupon_value" jdbcType="INTEGER" property="couponValue"/>
+        <result column="package_name" jdbcType="INTEGER" property="packageName"/>
+        <result column="class_hour" jdbcType="INTEGER" property="classHour"/>
+    </resultMap>
+
+    <!--查询订单-->
+    <select id="getOrder" parameterType="map" resultMap="BaseResultMap">
+        select tor.*,tc.course_name,tc.gym_id,tc.class_hour,tco.coupon_name,tco.coupon_value,tu.name,tpk.package_name,tpk.card_type buyCardType,tpk.arrive
+        <if test='queryCardNo == "1" '>
+            ,tp.card_type,concat(tp.card_type,LEFT('0000000000',(9-LENGTH(tcc.card_id))) , tcc.card_id) cardNo
+        </if>
+        from t_order tor
+        LEFT JOIN t_course tc ON tor.course_id = tc.course_id
+        LEFT JOIN t_user tu ON tor.user_id = tu.user_id
+        LEFT JOIN t_user_coupon tuc ON tor.user_coupon_id = tuc.user_coupon_id
+        LEFT JOIN t_coupon tco ON tuc.coupon_id = tco.coupon_id
+        LEFT JOIN t_package tpk ON tor.package_id = tpk.package_id
+        <if test='queryCardNo == "1" '>
+            LEFT JOIN t_club_card tcc ON tor.card_id = tcc.card_id
+            LEFT JOIN t_package tp ON tcc.package_id = tp.package_id
+        </if>
+        where 1=1
+        <if test="orderId != null and orderId != '' ">
+            AND tor.order_id = #{orderId}
+        </if>
+        <if test="openid != null and openid != '' ">
+            AND tor.openid = #{openid}
+        </if>
+        <if test="userId != null and userId != '' ">
+            AND tor.user_id = #{userId}
+        </if>
+        <if test="cardId != null and cardId != '' ">
+            AND tor.card_id = #{cardId}
+        </if>
+        <if test="orderType != null and orderType != '' ">
+            AND tor.order_type IN (${orderType})
+        </if>
+        <if test="gymId != null and gymId != '' ">
+            AND tc.gym_id = #{gymId}
+        </if>
+        <if test="courseId != null and courseId != '' ">
+            AND tor.course_id = #{courseId}
+        </if>
+        <if test="status != null and status != '' ">
+            AND tor.status in (${status})
+        </if>
+        <if test="couponId != null and couponId != '' ">
+            AND tuc.coupon_id = #{couponId}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(tor.create_time) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(tor.create_time)
+        </if>
+        <if test="conditions != null and conditions != '' ">
+            and tu.name like concat('%', #{conditions}, '%')
+        </if>
+        <!--查询会员卡消费记录-->
+        <if test='queryType == "1" '>
+            AND (tor.status in (3,5) AND tor.order_type in(1,3))
+        </if>
+        <!--查询优惠券使用记录-->
+        <if test='queryType == "2" '>
+            AND tor.user_coupon_id > 0
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_order
+        where order_id = #{orderId,jdbcType=INTEGER}
+    </delete>
+    <!--添加订单-->
+    <insert id="insertOrder" parameterType="com.hyperfit.entity.TOrder" useGeneratedKeys="true" keyProperty="orderId">
+        insert into t_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                order_id,
+            </if>
+            <if test="orderType != null">
+                order_type,
+            </if>
+            <if test="openid != null">
+                openid,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="courseId != null">
+                course_id,
+            </if>
+            <if test="packageId != null">
+                package_id,
+            </if>
+            <if test="amount != null">
+                amount,
+            </if>
+            <if test="userCouponId != null">
+                user_coupon_id,
+            </if>
+            <if test="payType != null">
+                pay_type,
+            </if>
+            <if test="cardId != null">
+                card_id,
+            </if>
+            <if test="sysUserId != null">
+                sys_user_id,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="applyNo != null">
+                apply_no,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                #{orderId,jdbcType=INTEGER},
+            </if>
+            <if test="orderType != null">
+                #{orderType,jdbcType=INTEGER},
+            </if>
+            <if test="openid != null">
+                #{openid,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="courseId != null">
+                #{courseId,jdbcType=INTEGER},
+            </if>
+            <if test="packageId != null">
+                #{packageId,jdbcType=INTEGER},
+            </if>
+            <if test="amount != null">
+                #{amount,jdbcType=INTEGER},
+            </if>
+            <if test="userCouponId != null">
+                #{userCouponId,jdbcType=INTEGER},
+            </if>
+            <if test="payType != null">
+                #{payType,jdbcType=INTEGER},
+            </if>
+            <if test="cardId != null">
+                #{cardId,jdbcType=INTEGER},
+            </if>
+            <if test="sysUserId != null">
+                #{sysUserId,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="applyNo != null">
+                #{applyNo,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!--更新订单-->
+    <update id="updateOrder" parameterType="map">
+        update t_order
+        <set>
+            <if test="record.orderId != null">
+                order_id = #{record.orderId,jdbcType=INTEGER},
+            </if>
+            <if test="record.orderType != null">
+                order_type = #{record.orderType,jdbcType=INTEGER},
+            </if>
+            <if test="record.openid != null">
+                openid = #{record.openid,jdbcType=VARCHAR},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=INTEGER},
+            </if>
+            <if test="record.courseId != null">
+                course_id = #{record.courseId,jdbcType=INTEGER},
+            </if>
+            <if test="record.packageId != null">
+                package_id = #{record.packageId,jdbcType=INTEGER},
+            </if>
+            <if test="record.amount != null">
+                amount = #{record.amount,jdbcType=INTEGER},
+            </if>
+            <if test="record.userCouponId != null">
+                user_coupon_id = #{record.userCouponId,jdbcType=INTEGER},
+            </if>
+            <if test="record.payType != null">
+                pay_type = #{record.payType,jdbcType=INTEGER},
+            </if>
+            <if test="record.cardId != null">
+                card_id = #{record.cardId,jdbcType=INTEGER},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.applyNo != null">
+                apply_no = #{record.applyNo,jdbcType=VARCHAR},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.remark != null">
+                remark = #{record.remark,jdbcType=VARCHAR},
+            </if>
+            update_time = now()
+        </set>
+        WHERE order_id = #{record.orderId,jdbcType=INTEGER}
+    </update>
+
+</mapper>

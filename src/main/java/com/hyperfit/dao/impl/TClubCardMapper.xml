@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TClubCardMapper">
+    <resultMap id="BaseResultMap" type="com.hyperfit.entity.TClubCard">
+        <id column="card_id" jdbcType="INTEGER" property="cardId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="vice_user_id" jdbcType="INTEGER" property="viceUserId"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="balance" jdbcType="INTEGER" property="balance"/>
+        <result column="package_money" jdbcType="INTEGER" property="packageMoney"/>
+        <result column="money_used" jdbcType="INTEGER" property="moneyUsed"/>
+        <result column="times_used" jdbcType="INTEGER" property="timesUsed"/>
+        <result column="return_cash" jdbcType="INTEGER" property="returnCash"/>
+        <result column="card_type" jdbcType="INTEGER" property="cardType"/>
+        <result column="gym_ids" jdbcType="VARCHAR" property="gymIds"/>
+        <result column="course_ids" jdbcType="VARCHAR" property="courseIds"/>
+        <result column="is_return_cash" jdbcType="INTEGER" property="isReturnCash"/>
+        <result column="sys_user_id" jdbcType="INTEGER" property="sysUserId"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="old_deadline" jdbcType="TIMESTAMP" property="oldDeadline"/>
+        <collection property="returnCashCondition" javaType="ArrayList" column="packageId=package_id" ofType="Post"
+                    select="selectCondition"></collection>
+    </resultMap>
+    <!--查询会员卡-->
+    <select id="getClubCard" parameterType="map" resultMap="BaseResultMap">
+        select
+        <if test="userId != null and userId != '' ">
+            if(tcc.user_id = #{userId},tcc.user_id,tcc.vice_user_id) user_id,
+            if(tcc.vice_user_id = #{userId},tcc.user_id,tcc.vice_user_id) vice_user_id,
+        </if>
+        <if test="userId == null or userId == '' ">
+            tcc.user_id,tcc.vice_user_id,
+        </if>
+        tu.name userName,tu.phone userPhone,tur.phone viceUserPhone,tur.name viceUserName,tu.sex,tu.openid,
+        tcc.card_id, tcc.money_used, tcc.times_used, tcc.sys_user_id, tcc.old_deadline,tcc.status,
+        tcc.package_id,tcc.balance,tcc.package_money,tcc.create_time,tcc.return_cash,su.truename sysUserName,
+        tp.card_type,tp.gym_ids,tp.course_ids,tp.is_return_cash,
+        DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY) deadline,
+        concat(tp.card_type,LEFT('0000000000',(9-LENGTH(tcc.card_id))) , tcc.card_id) cardNo
+        from t_club_card tcc
+        LEFT JOIN t_package tp ON tcc.package_id = tp.package_id
+        LEFT JOIN t_user tu ON tcc.user_id = tu.user_id
+        LEFT JOIN t_user tur ON tcc.vice_user_id = tur.user_id
+        LEFT JOIN sys_user su ON tcc.sys_user_id = su.sys_user_id
+        where 1 = 1
+        <if test="cardId != null and cardId != '' ">
+            AND tcc.card_id = #{cardId}
+        </if>
+        <if test="status != null and status != '' ">
+            AND tcc.status = #{status}
+        </if>
+        <if test="packageId != null and packageId != '' ">
+            AND tcc.package_id = #{packageId}
+        </if>
+        <if test="startDate != null and startDate != '' ">
+            and Date(DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY)) >= Date(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != '' ">
+            and Date(#{endDate}) >= Date(DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY))
+        </if>
+        <if test="balanceA != null and balanceA != '' ">
+            AND tcc.balance >= #{balanceA}
+        </if>
+        <if test="balanceB != null and balanceB != '' ">
+            AND #{balanceB} >= tcc.balance
+        </if>
+        <if test="userId != null and userId != '' ">
+            AND (tcc.user_id = #{userId} OR tcc.vice_user_id = #{userId})
+        </if>
+        <!--查询未过期-->
+        <if test='queryType == "1" '>
+            AND DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY) >= now()
+        </if>
+        <!--查询已过期-->
+        <if test='queryType == "2" '>
+            AND  now() >= DATE_ADD(tcc.create_time,INTERVAL tp.indate DAY)
+        </if>
+        ORDER BY tcc.card_id
+    </select>
+    <!--查询会员卡所在套餐返现活动条件-->
+    <resultMap id="ConditionMap" type="com.hyperfit.entity.TReturnCashCondition">
+        <id column="condition_id" jdbcType="INTEGER" property="conditionId"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="days" jdbcType="INTEGER" property="days"/>
+        <result column="money" jdbcType="INTEGER" property="money"/>
+        <result column="times" jdbcType="INTEGER" property="times"/>
+        <result column="return_cash" jdbcType="INTEGER" property="returnCash"/>
+    </resultMap>
+    <select id="selectCondition" parameterType="map" resultMap="ConditionMap">
+        select *
+        from t_return_cash_condition
+        where package_id = #{packageId,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_club_card
+        where card_id = #{cardId,jdbcType=INTEGER}
+    </delete>
+    <!--添加会员卡-->
+    <insert id="insertClubCard" parameterType="com.hyperfit.entity.TClubCard">
+        insert into t_club_card
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cardId != null">
+                card_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="viceUserId != null">
+                vice_user_id,
+            </if>
+            <if test="packageId != null">
+                package_id,
+            </if>
+            <if test="balance != null">
+                balance,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="sysUserId != null">
+                sys_user_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="cardId != null">
+                #{cardId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="viceUserId != null">
+                #{viceUserId,jdbcType=INTEGER},
+            </if>
+            <if test="packageId != null">
+                #{packageId,jdbcType=INTEGER},
+            </if>
+            <if test="balance != null">
+                #{balance,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="sysUserId != null">
+                #{sysUserId,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <!--修改会员卡-->
+    <update id="updateClubCard" parameterType="map">
+        update t_club_card
+        <set>
+            <if test="record.cardId != null">
+                card_id = #{record.cardId,jdbcType=INTEGER},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=INTEGER},
+            </if>
+            <if test="record.viceUserId != null">
+                vice_user_id = #{record.viceUserId,jdbcType=INTEGER},
+            </if>
+            <if test="record.packageId != null">
+                package_id = #{record.packageId,jdbcType=INTEGER},
+            </if>
+            <if test="record.balance != null">
+                balance = #{record.balance,jdbcType=INTEGER},
+            </if>
+            <if test="record.moneyUsed != null">
+                money_used = #{record.moneyUsed,jdbcType=INTEGER},
+            </if>
+            <if test="record.timesUsed != null">
+                times_used = #{record.timesUsed,jdbcType=INTEGER},
+            </if>
+            <if test="record.returnCash != null">
+                return_cash = #{record.returnCash,jdbcType=INTEGER},
+            </if>
+            <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+            </if>
+            <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.oldDeadline != null">
+                old_deadline = #{record.oldDeadline,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE card_id = #{record.cardId,jdbcType=INTEGER}
+    </update>
+
+</mapper>
